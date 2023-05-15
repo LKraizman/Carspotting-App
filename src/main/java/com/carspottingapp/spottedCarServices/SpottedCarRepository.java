@@ -1,8 +1,8 @@
 package com.carspottingapp.spottedCarServices;
 
-import com.carspottingapp.spottedCar.SpottedCar;
+import com.carspottingapp.spottedCar.CarSpot;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface SpottedCarRepository extends JpaRepository<SpottedCar, Integer> {
+public interface SpottedCarRepository extends JpaRepository<CarSpot, Integer> {
 
 }
