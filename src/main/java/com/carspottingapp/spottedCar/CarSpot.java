@@ -9,7 +9,8 @@ public class CarSpot {
     @Id
     @SequenceGenerator(
             name = "carspot_id_sequence",
-            sequenceName = "carspot_id_sequence"
+            sequenceName = "carspot_id_sequence",
+            allocationSize = 1
     )
     @GeneratedValue(
             strategy = GenerationType.SEQUENCE,

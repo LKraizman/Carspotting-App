@@ -1,33 +1,34 @@
 package com.carspottingapp.spottedCarControllers;
 
 import com.carspottingapp.spottedCar.CarSpot;
-import com.carspottingapp.spottedCarServices.NewSpottedCarRequest;
-import com.carspottingapp.spottedCarServices.SpottedCarRepository;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import com.carspottingapp.spottedCarServices.CarSpotService;
+import com.carspottingapp.spottedCarServices.NewCarSpotRequest;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@RequestMapping("api/carspots")
 public class CarSpotController {
+    private final CarSpotService carSpotService;
+    public CarSpotController(CarSpotService carSpotService) {
+        this.carSpotService = carSpotService;
+    }
+
     @PostMapping
-    public void addSpottedcar(@RequestBody NewSpottedCarRequest request) {
-        CarSpot carSpot = new CarSpot();
-        carSpot.setTitle(request.carSpotTitle);
-        carSpot.setCarManufacture(request.carManufacture);
-        carSpot.setCarModel(request.carModel);
+    public void addCarSpot(@RequestBody NewCarSpotRequest request) {
+        carSpotService.addCarSpot(request);
     }
-
-    public final SpottedCarRepository spottedCarRepository;
-
-    public CarSpotController(SpottedCarRepository spottedCarRepository) {
-        this.spottedCarRepository = spottedCarRepository;
-    }
-
     @GetMapping
-    public List<CarSpot> getSpottedCars() {
-        return spottedCarRepository.findAll();
+    public List<CarSpot> getCarSpots() {
+        return carSpotService.getCarSpots();
+    }
+    @PutMapping("{carSpotId}")
+    public void editCarSpot(@PathVariable("carSpotId") Long id, @RequestBody NewCarSpotRequest request){
+        carSpotService.editCarSpot(id,request);
+    }
+    @DeleteMapping("{carSpotId}")
+    public void deleteCarSpot(@PathVariable("carSpotId") Long id){
+        carSpotService.deleteCarSpot(id);
     }
 }
