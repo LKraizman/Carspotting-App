@@ -16,22 +16,18 @@ public class CarSpotService {
         return carSpotRepository.findAll();
     }
 
-    public void addCarSpot(NewCarSpotRequest request){
-        CarSpot newCarSpot = new CarSpot();
-        newCarSpot.setTitle(request.carSpotTitle);
-        newCarSpot.setCarManufacture(request.carManufacture);
-        newCarSpot.setCarModel(request.carModel);
-        newCarSpot.setSpotDate(LocalDateTime.now());
-        carSpotRepository.save(newCarSpot);
+    public CarSpot addCarSpot(NewCarSpotRequest request){
+        CarSpot newCarSpot = new CarSpot(request.carSpotTitle, request.carManufacture, request.carModel, request.spotDate.toString());
+        return carSpotRepository.save(newCarSpot);
     }
 
-    public void editCarSpot(Long id, NewCarSpotRequest request){
+    public CarSpot editCarSpot(Long id, NewCarSpotRequest request){
         CarSpot updateCarSpot = carSpotRepository.findById(id).orElseThrow();
         updateCarSpot.setTitle(request.carSpotTitle);
         updateCarSpot.setCarManufacture(request.carManufacture);
         updateCarSpot.setCarModel(request.carModel);
-        updateCarSpot.setSpotDate(LocalDateTime.now());
-        carSpotRepository.save(updateCarSpot);
+        updateCarSpot.setSpotDate(LocalDateTime.now().toString());
+        return carSpotRepository.save(updateCarSpot);
     }
 
     public void deleteCarSpot(Long id){

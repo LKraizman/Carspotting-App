@@ -20,17 +20,16 @@ public class CarSpot {
     private String carSpotTitle;
     private String carManufacture;
     private String carModel;
-    private LocalDateTime spotDate;
+    private String spotDate;
 
-    public CarSpot(Long id,
-                   String title,
+    public CarSpot(String title,
                    String carManufacture,
-                   String carModel) {
-        this.carSpotId = id;
+                   String carModel,
+                   String date) {
         this.carSpotTitle = title;
         this.carManufacture = carManufacture;
         this.carModel = carModel;
-        this.spotDate = LocalDateTime.now();
+        this.spotDate = date;
     }
 
     public CarSpot() {
@@ -69,22 +68,11 @@ public class CarSpot {
         this.carModel = carModel;
     }
 
-    public LocalDateTime getSpotDate() {
+    public String getSpotDate() {
         return spotDate;
     }
 
-    public void setSpotDate(LocalDateTime spotDate) {
+    public void setSpotDate(String spotDate) {
         this.spotDate = spotDate;
-    }
-
-    @Override
-    public String toString() {
-        return "SpottedCar{" +
-                "id=" + carSpotId +
-                ", title='" + carSpotTitle + '\'' +
-                ", carManufacture='" + carManufacture + '\'' +
-                ", carModel='" + carModel + '\'' +
-                ", spotDate='" + spotDate + '\'' +
-                '}';
     }
 }
