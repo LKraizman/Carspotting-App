@@ -17,7 +17,7 @@ public class CarSpotService {
     }
 
     public CarSpot addCarSpot(NewCarSpotRequest request){
-        CarSpot newCarSpot = new CarSpot(request.carSpotTitle, request.carManufacture, request.carModel, request.spotDate.toString());
+        CarSpot newCarSpot = new CarSpot(request.carSpotTitle, request.carManufacture, request.carModel, request.spotDate);
         return carSpotRepository.save(newCarSpot);
     }
 
@@ -26,7 +26,7 @@ public class CarSpotService {
         updateCarSpot.setTitle(request.carSpotTitle);
         updateCarSpot.setCarManufacture(request.carManufacture);
         updateCarSpot.setCarModel(request.carModel);
-        updateCarSpot.setSpotDate(LocalDateTime.now().toString());
+        updateCarSpot.setSpotDate(request.spotDate);
         return carSpotRepository.save(updateCarSpot);
     }
 

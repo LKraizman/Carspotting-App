@@ -20,12 +20,12 @@ public class CarSpot {
     private String carSpotTitle;
     private String carManufacture;
     private String carModel;
-    private String spotDate;
+    private LocalDateTime spotDate;
 
     public CarSpot(String title,
                    String carManufacture,
                    String carModel,
-                   String date) {
+                   LocalDateTime date) {
         this.carSpotTitle = title;
         this.carManufacture = carManufacture;
         this.carModel = carModel;
@@ -68,11 +68,11 @@ public class CarSpot {
         this.carModel = carModel;
     }
 
-    public String getSpotDate() {
+    public LocalDateTime getSpotDate() {
         return spotDate;
     }
 
-    public void setSpotDate(String spotDate) {
+    public void setSpotDate(LocalDateTime spotDate) {
         this.spotDate = spotDate;
     }
 }
