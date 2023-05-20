@@ -9,7 +9,8 @@ public class CarSpot {
     @Id
     @SequenceGenerator(
             name = "carspot_id_sequence",
-            sequenceName = "carspot_id_sequence"
+            sequenceName = "carspot_id_sequence",
+            allocationSize = 1
     )
     @GeneratedValue(
             strategy = GenerationType.SEQUENCE,
@@ -21,15 +22,14 @@ public class CarSpot {
     private String carModel;
     private LocalDateTime spotDate;
 
-    public CarSpot(Long id,
-                   String title,
+    public CarSpot(String title,
                    String carManufacture,
-                   String carModel) {
-        this.carSpotId = id;
+                   String carModel,
+                   LocalDateTime date) {
         this.carSpotTitle = title;
         this.carManufacture = carManufacture;
         this.carModel = carModel;
-        this.spotDate = LocalDateTime.now();
+        this.spotDate = date;
     }
 
     public CarSpot() {
@@ -74,16 +74,5 @@ public class CarSpot {
 
     public void setSpotDate(LocalDateTime spotDate) {
         this.spotDate = spotDate;
-    }
-
-    @Override
-    public String toString() {
-        return "SpottedCar{" +
-                "id=" + carSpotId +
-                ", title='" + carSpotTitle + '\'' +
-                ", carManufacture='" + carManufacture + '\'' +
-                ", carModel='" + carModel + '\'' +
-                ", spotDate='" + spotDate + '\'' +
-                '}';
     }
 }
