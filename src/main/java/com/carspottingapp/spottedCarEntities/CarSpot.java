@@ -1,4 +1,4 @@
-package com.carspottingapp.spottedCar;
+package com.carspottingapp.spottedCarEntities;
 
 import jakarta.persistence.*;
 
