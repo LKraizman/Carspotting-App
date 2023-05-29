@@ -2,10 +2,12 @@ package com.carspottingapp.spottedCarControllers;
 
 import com.carspottingapp.exceptions.InvalidIdException;
 import com.carspottingapp.exceptions.InvalidTitleLengthException;
-import com.carspottingapp.spottedCarEntities.CarSpot;
+import com.carspottingapp.spottedCarModels.CarSpot;
+import com.carspottingapp.spottedCarModels.responses.CarSpotResponse;
 import com.carspottingapp.spottedCarServices.CarSpotService;
 import com.carspottingapp.spottedCarServices.NewCarSpotRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -35,10 +37,10 @@ public class CarSpotController {
         return carSpotService.getCarSpots();
     }
 
-    @GetMapping("/{id}")
-    public CarSpot getCarSpotById(@PathVariable Long id) {
+    @GetMapping("{carSpotid}")
+    public ResponseEntity<CarSpotResponse> getCarSpotById(@PathVariable Long carSpotid) {
         try {
-            return carSpotService.getCarSpotById(id);
+            return new ResponseEntity<>(carSpotService.getCarSpotById(carSpotid), HttpStatus.OK);
         } catch (InvalidIdException e) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "Car Spot not found", e);

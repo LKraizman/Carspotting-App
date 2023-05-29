@@ -2,9 +2,12 @@ package com.carspottingapp.spottedCarServices;
 
 import com.carspottingapp.exceptions.InvalidIdException;
 import com.carspottingapp.exceptions.InvalidTitleLengthException;
-import com.carspottingapp.spottedCarEntities.CarSpot;
+import com.carspottingapp.repositories.CarSpotRepository;
+import com.carspottingapp.spottedCarModels.CarSpot;
+import com.carspottingapp.spottedCarModels.responses.CarSpotResponse;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -19,13 +22,20 @@ public class CarSpotService {
         return carSpotRepository.findAll();
     }
 
-    public CarSpot getCarSpotById(Long id) {
-        return carSpotRepository.findById(id).orElseThrow(()
+    public CarSpotResponse getCarSpotById(Long id) {
+        return carSpotRepository.findById(id).map(carSpot ->
+                new CarSpotResponse(
+                        carSpot.getCarSpotId(),
+                        carSpot.getCarSpotTitle(),
+                        carSpot.getCarModel().getCarManufacturer().getCarManufacturer(),
+                        carSpot.getCarModel().getCarModel(),
+                        carSpot.getSpotDate())).
+                orElseThrow(()
                 -> new InvalidIdException("Car Spot not found"));
     }
 
     public CarSpot addCarSpot(NewCarSpotRequest request) throws InvalidTitleLengthException {
-        CarSpot newCarSpot = new CarSpot(request.carSpotTitle, request.carManufacture, request.carModel, request.spotDate);
+        CarSpot newCarSpot = new CarSpot(request.carSpotTitle, request.carModelId, LocalDateTime.now());
         if (request.carSpotTitle.length() > 30) {
             throw new InvalidTitleLengthException("Incorrect title length. Must be less then 30 characters");
         }
@@ -38,9 +48,8 @@ public class CarSpotService {
         if (request.carSpotTitle.length() > 30) {
             throw new InvalidTitleLengthException("Incorrect title length. Must be less then 30 characters");
         }
-        updateCarSpot.setTitle(request.carSpotTitle);
-        updateCarSpot.setCarManufacture(request.carManufacture);
-        updateCarSpot.setCarModel(request.carModel);
+        updateCarSpot.setCarSpotTitle(request.carSpotTitle);
+        updateCarSpot.setCarModelId(request.carModelId);
         updateCarSpot.setSpotDate(request.spotDate);
         return carSpotRepository.save(updateCarSpot);
     }

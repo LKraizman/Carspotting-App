@@ -4,15 +4,11 @@ import java.time.LocalDateTime;
 
 public class NewCarSpotRequest {
     public String carSpotTitle;
-    public String carManufacture;
-    public String carModel;
+    public Long carModelId;
     public LocalDateTime spotDate;
 
-    public NewCarSpotRequest(String title, String carManufacture, String carModel) {
+    public NewCarSpotRequest(String title, Long carModelId) {
         this.carSpotTitle = title;
-        this.carManufacture = carManufacture;
-        this.carModel = carModel;
-        this.spotDate = LocalDateTime.now();
+        this.carModelId = carModelId;
     }
-
 }
