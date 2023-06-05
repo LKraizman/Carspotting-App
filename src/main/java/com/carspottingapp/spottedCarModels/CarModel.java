@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Cascade;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -27,4 +30,5 @@ public class CarModel {
 
     @Column(name = "carmodel")
     private String carModel;
+
 }

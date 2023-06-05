@@ -14,7 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/models")
+@RequestMapping("api/model")
 public class CarModelController {
     private final CarModelService carModelService;
     public CarModelController(CarModelService carModelService) {

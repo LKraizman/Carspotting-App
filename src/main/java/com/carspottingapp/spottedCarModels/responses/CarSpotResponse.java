@@ -14,5 +14,9 @@ public class CarSpotResponse {
     private String title;
     private String manufacturer;
     private String model;
+    private String description;
+    private String photoLink;
     private LocalDateTime date;
+
+
 }

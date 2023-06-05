@@ -1,8 +1,7 @@
 package com.carspottingapp.spottedCarControllers;
 
 import com.carspottingapp.exceptions.InvalidIdException;
-import com.carspottingapp.exceptions.InvalidTitleLengthException;
-import com.carspottingapp.spottedCarModels.CarSpot;
+import com.carspottingapp.exceptions.InvalidLengthException;
 import com.carspottingapp.spottedCarModels.responses.CarSpotResponse;
 import com.carspottingapp.spottedCarServices.CarSpotService;
 import com.carspottingapp.spottedCarServices.NewCarSpotRequest;
@@ -23,18 +22,18 @@ public class CarSpotController {
     }
 
     @PostMapping
-    public void addCarSpot(@RequestBody NewCarSpotRequest request) {
+    public ResponseEntity<CarSpotResponse> addCarSpot(@RequestBody NewCarSpotRequest request) {
         try {
-            carSpotService.addCarSpot(request);
-        } catch (InvalidTitleLengthException e) {
+            return new ResponseEntity<>(carSpotService.addCarSpot(request), HttpStatus.OK);
+        } catch (InvalidLengthException e) {
             throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "Incorrect title length", e);
+                    HttpStatus.BAD_REQUEST, "Incorrect text length", e);
         }
     }
 
     @GetMapping
-    public List<CarSpot> getCarSpots() {
-        return carSpotService.getCarSpots();
+    public ResponseEntity<List<CarSpotResponse>> getCarSpots() {
+        return new ResponseEntity<>(carSpotService.getCarSpots(), HttpStatus.OK);
     }
 
     @GetMapping("{carSpotid}")
@@ -48,12 +47,12 @@ public class CarSpotController {
     }
 
     @PutMapping("{carSpotId}")
-    public void editCarSpot(@PathVariable("carSpotId") Long id, @RequestBody NewCarSpotRequest request) {
+    public ResponseEntity<CarSpotResponse> editCarSpot(@PathVariable("carSpotId") Long id, @RequestBody NewCarSpotRequest request) {
         try {
-            carSpotService.editCarSpot(id, request);
-        } catch (InvalidTitleLengthException e) {
+            return new ResponseEntity<>(carSpotService.editCarSpot(id, request), HttpStatus.OK);
+        } catch (InvalidLengthException e) {
             throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "Incorrect title length", e);
+                    HttpStatus.BAD_REQUEST, "Incorrect text length", e);
         } catch (InvalidIdException e) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "Car Spot not found", e);

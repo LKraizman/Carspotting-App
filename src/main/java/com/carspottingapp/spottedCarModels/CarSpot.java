@@ -26,16 +26,25 @@ public class CarSpot {
     @Column(name = "carmodel_id")
     private Long carModelId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
     @JoinColumn(name = "carmodel_id", insertable = false, updatable = false)
     private CarModel carModel;
 
     @Column(name = "spotdate")
     private LocalDateTime spotDate;
 
-    public CarSpot(String carSpotTitle, Long carModelId, LocalDateTime spotDate) {
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "photolink")
+    private String photoLink;
+
+    public CarSpot(String carSpotTitle, String description, String photoLink, CarModel carModel, LocalDateTime spotDate) {
         this.carSpotTitle = carSpotTitle;
-        this.carModelId = carModelId;
+        this.description = description;
+        this.photoLink = photoLink;
+        this.carModelId = carModel.getCarModelId();
+        this.carModel = carModel;
         this.spotDate = spotDate;
     }
 }
