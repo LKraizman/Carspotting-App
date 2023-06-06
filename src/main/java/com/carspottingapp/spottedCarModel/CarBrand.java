@@ -1,4 +1,4 @@
-package com.carspottingapp.spottedCarModels;
+package com.carspottingapp.spottedCarModel;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -13,14 +13,16 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "carmanufacturer")
-public class CarManufacturer {
+@Table(name = "car_brands")
+public class CarBrand {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "carmanufacturerid")
-    private Long carManufacturerId;
-    @Column(name = "carmanufacturer")
-    private String carManufacturer;
-    @OneToMany(mappedBy = "carManufacturer")
+    @Column(name = "car_brand_id")
+    private Long carBrandId;
+
+    @Column(name = "car_brand")
+    private String carBrand;
+
+    @OneToMany(mappedBy = "carBrand")
     private List<CarModel> models;
 }

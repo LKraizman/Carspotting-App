@@ -1,10 +1,11 @@
-package com.carspottingapp.spottedCarControllers;
+package com.carspottingapp.spottedCarController;
 
-import com.carspottingapp.exceptions.InvalidIdException;
-import com.carspottingapp.exceptions.InvalidLengthException;
-import com.carspottingapp.spottedCarModels.responses.CarSpotResponse;
-import com.carspottingapp.spottedCarServices.CarSpotService;
-import com.carspottingapp.spottedCarServices.NewCarSpotRequest;
+import com.carspottingapp.exception.InvalidIdException;
+import com.carspottingapp.exception.InvalidLengthException;
+import com.carspottingapp.spottedCarModel.response.CarSpotResponse;
+import com.carspottingapp.spottedCarService.CarSpotService;
+import com.carspottingapp.spottedCarService.NewCarSpotRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,13 +14,10 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/carspots")
+@RequiredArgsConstructor
+@RequestMapping("api/car-spots")
 public class CarSpotController {
     private final CarSpotService carSpotService;
-
-    public CarSpotController(CarSpotService carSpotService) {
-        this.carSpotService = carSpotService;
-    }
 
     @PostMapping
     public ResponseEntity<CarSpotResponse> addCarSpot(@RequestBody NewCarSpotRequest request) {
@@ -36,7 +34,7 @@ public class CarSpotController {
         return new ResponseEntity<>(carSpotService.getCarSpots(), HttpStatus.OK);
     }
 
-    @GetMapping("{carSpotid}")
+    @GetMapping("/{carSpotid}")
     public ResponseEntity<CarSpotResponse> getCarSpotById(@PathVariable Long carSpotid) {
         try {
             return new ResponseEntity<>(carSpotService.getCarSpotById(carSpotid), HttpStatus.OK);
@@ -46,7 +44,7 @@ public class CarSpotController {
         }
     }
 
-    @PutMapping("{carSpotId}")
+    @PutMapping("/{carSpotId}")
     public ResponseEntity<CarSpotResponse> editCarSpot(@PathVariable("carSpotId") Long id, @RequestBody NewCarSpotRequest request) {
         try {
             return new ResponseEntity<>(carSpotService.editCarSpot(id, request), HttpStatus.OK);
@@ -59,7 +57,7 @@ public class CarSpotController {
         }
     }
 
-    @DeleteMapping("{carSpotId}")
+    @DeleteMapping("/{carSpotId}")
     public void deleteCarSpot(@PathVariable("carSpotId") Long id) {
         try {
             carSpotService.deleteCarSpot(id);

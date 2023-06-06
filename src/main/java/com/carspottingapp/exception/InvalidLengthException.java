@@ -1,4 +1,4 @@
-package com.carspottingapp.exceptions;
+package com.carspottingapp.exception;
 
 public class InvalidLengthException extends Exception{
 }

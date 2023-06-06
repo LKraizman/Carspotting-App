@@ -1,4 +1,4 @@
-package com.carspottingapp.spottedCarServices;
+package com.carspottingapp.spottedCarService;
 
 
 import java.time.LocalDateTime;
