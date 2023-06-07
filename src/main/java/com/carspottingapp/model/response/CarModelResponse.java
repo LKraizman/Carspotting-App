@@ -1,6 +1,6 @@
-package com.carspottingapp.spottedCarModel.response;
+package com.carspottingapp.model.response;
 
-import com.carspottingapp.spottedCarModel.CarModel;
+import com.carspottingapp.model.CarModel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +14,6 @@ public class CarModelResponse {
 
     public CarModelResponse(CarModel carModel){
         this.id = carModel.getCarModelId();
-        this.model = carModel.getCarModel();
+        this.model = carModel.getCarModelName();
     }
 }

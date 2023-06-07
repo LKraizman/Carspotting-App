@@ -1,10 +1,10 @@
-package com.carspottingapp.spottedCarController;
+package com.carspottingapp.сontroller;
 
 import com.carspottingapp.exception.InvalidIdException;
 import com.carspottingapp.exception.InvalidLengthException;
-import com.carspottingapp.spottedCarModel.response.CarSpotResponse;
-import com.carspottingapp.spottedCarService.CarSpotService;
-import com.carspottingapp.spottedCarService.NewCarSpotRequest;
+import com.carspottingapp.model.response.CarSpotResponse;
+import com.carspottingapp.service.CarSpotService;
+import com.carspottingapp.service.NewCarSpotRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

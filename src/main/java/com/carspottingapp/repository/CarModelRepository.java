@@ -1,6 +1,6 @@
 package com.carspottingapp.repository;
 
-import com.carspottingapp.spottedCarModel.CarModel;
+import com.carspottingapp.model.CarModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

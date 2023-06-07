@@ -1,6 +1,6 @@
-package com.carspottingapp.spottedCarModel.response;
+package com.carspottingapp.model.response;
 
-import com.carspottingapp.spottedCarModel.CarBrand;
+import com.carspottingapp.model.CarBrand;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,10 +10,10 @@ import lombok.NoArgsConstructor;
 @Getter
 public class CarBrandResponse {
     private Long id;
-    private String manufacturer;
+    private String brand;
 
     public CarBrandResponse(CarBrand brand) {
         this.id = brand.getCarBrandId();
-        this.manufacturer = brand.getCarBrand();
+        this.brand = brand.getCarBrandName();
     }
 }

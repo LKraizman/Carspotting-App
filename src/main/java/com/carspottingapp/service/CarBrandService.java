@@ -1,7 +1,7 @@
-package com.carspottingapp.spottedCarService;
+package com.carspottingapp.service;
 
 import com.carspottingapp.repository.CarBrandRepository;
-import com.carspottingapp.spottedCarModel.response.CarBrandResponse;
+import com.carspottingapp.model.response.CarBrandResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -1,10 +1,10 @@
-package com.carspottingapp.spottedCarController;
+package com.carspottingapp.сontroller;
 
 import com.carspottingapp.exception.InvalidIdException;
-import com.carspottingapp.spottedCarModel.response.CarBrandResponse;
-import com.carspottingapp.spottedCarModel.response.CarModelResponse;
-import com.carspottingapp.spottedCarService.CarBrandService;
-import com.carspottingapp.spottedCarService.CarModelService;
+import com.carspottingapp.model.response.CarBrandResponse;
+import com.carspottingapp.model.response.CarModelResponse;
+import com.carspottingapp.service.CarBrandService;
+import com.carspottingapp.service.CarModelService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +23,7 @@ public class CarController {
     private final CarModelService carModelService;
     private final CarBrandService carBrandService;
 
-    @GetMapping("/all-brands")
+    @GetMapping("/brands")
     public ResponseEntity<List<CarBrandResponse>> getCarBrandById() {
         try {
             return new ResponseEntity<>(carBrandService.getCarBrands(), HttpStatus.OK) ;
@@ -32,10 +32,10 @@ public class CarController {
                     HttpStatus.NOT_FOUND, "Brand not found", e);
         }
     }
-    @GetMapping("/all-brands/{carBrandId}/models")
+    @GetMapping("/brands/{carBrandId}/models")
     public ResponseEntity<List<CarModelResponse>> getCarModelsById(@PathVariable Long carBrandId) {
         try {
-            List<CarModelResponse> models = carModelService.getModelsByBrand(carBrandId);
+            List<CarModelResponse> models = carModelService.getModelsByBrandId(carBrandId);
             return new ResponseEntity<>(models, HttpStatus.OK) ;
         } catch (InvalidIdException e) {
             throw new ResponseStatusException(

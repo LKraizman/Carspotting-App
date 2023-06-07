@@ -1,4 +1,4 @@
-package com.carspottingapp.spottedCarModel;
+package com.carspottingapp.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

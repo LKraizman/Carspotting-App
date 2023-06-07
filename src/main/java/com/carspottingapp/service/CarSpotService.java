@@ -1,13 +1,12 @@
-package com.carspottingapp.spottedCarService;
+package com.carspottingapp.service;
 
 import com.carspottingapp.exception.InvalidIdException;
 import com.carspottingapp.exception.InvalidLengthException;
 import com.carspottingapp.repository.CarModelRepository;
 import com.carspottingapp.repository.CarSpotRepository;
-import com.carspottingapp.spottedCarModel.CarModel;
-import com.carspottingapp.spottedCarModel.CarSpot;
-import com.carspottingapp.spottedCarModel.response.CarSpotResponse;
-import lombok.AllArgsConstructor;
+import com.carspottingapp.model.CarModel;
+import com.carspottingapp.model.CarSpot;
+import com.carspottingapp.model.response.CarSpotResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -31,38 +30,41 @@ public class CarSpotService {
     }
 
     public CarSpotResponse addCarSpot(NewCarSpotRequest request) throws InvalidLengthException {
-
-        Optional<CarModel> byId = carModelRepository.findById(request.carModelId);
-
-        CarSpot newCarSpot = byId.map(model -> new CarSpot(
-                request.carSpotTitle,
-                request.description,
-                request.photoLink,
-                model,
-                LocalDateTime.now()))
-                .orElseThrow(InvalidIdException::new);
-
         if (request.carSpotTitle.length() > 30) {
             throw new InvalidLengthException();
         } else if (request.description.length() > 300) {
             throw new InvalidLengthException();
         }
+
+        Optional<CarModel> carModelById = carModelRepository.findById(request.carModelId);
+
+        CarSpot newCarSpot = carModelById.map(model -> new CarSpot(
+                request.carSpotTitle,
+                request.description,
+                request.pictureUrl,
+                model,
+                LocalDateTime.now()))
+                .orElseThrow(InvalidIdException::new);
+
         CarSpot saveSpot = carSpotRepository.save(newCarSpot);
         return new CarSpotResponse(saveSpot);
     }
 
     public CarSpotResponse editCarSpot(Long id, NewCarSpotRequest request) throws InvalidLengthException {
-        CarSpot updateCarSpot = carSpotRepository.findById(id).orElseThrow(InvalidIdException::new);
         if (request.carSpotTitle.length() > 30) {
             throw new InvalidLengthException();
         } else if (request.description.length() > 300) {
             throw new InvalidLengthException();
         }
+
+        CarSpot updateCarSpot = carSpotRepository.findById(id).orElseThrow(InvalidIdException::new);
+
         updateCarSpot.setCarSpotTitle(request.carSpotTitle);
         updateCarSpot.setDescription(request.description);
-        updateCarSpot.setPictureUrl(request.photoLink);
+        updateCarSpot.setPictureUrl(request.pictureUrl);
         updateCarSpot.setCarModelId(request.carModelId);
         updateCarSpot.setSpotDate(request.spotDate);
+
         CarSpot updatedSpot = carSpotRepository.save(updateCarSpot);
         return new CarSpotResponse(updatedSpot);
     }

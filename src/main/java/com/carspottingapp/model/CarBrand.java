@@ -1,4 +1,4 @@
-package com.carspottingapp.spottedCarModel;
+package com.carspottingapp.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -21,7 +21,7 @@ public class CarBrand {
     private Long carBrandId;
 
     @Column(name = "car_brand")
-    private String carBrand;
+    private String carBrandName;
 
     @OneToMany(mappedBy = "carBrand")
     private List<CarModel> models;
