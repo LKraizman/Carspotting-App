@@ -34,10 +34,10 @@ public class CarSpotController {
         return new ResponseEntity<>(carSpotService.getCarSpots(), HttpStatus.OK);
     }
 
-    @GetMapping("/{carSpotid}")
-    public ResponseEntity<CarSpotResponse> getCarSpotById(@PathVariable Long carSpotid) {
+    @GetMapping("/{carSpotId}")
+    public ResponseEntity<CarSpotResponse> getCarSpotById(@PathVariable Long carSpotId) {
         try {
-            return new ResponseEntity<>(carSpotService.getCarSpotById(carSpotid), HttpStatus.OK);
+            return new ResponseEntity<>(carSpotService.getCarSpotById(carSpotId), HttpStatus.OK);
         } catch (InvalidIdException e) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "Car Spot not found", e);

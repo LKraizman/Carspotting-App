@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/migrations/01_car_brands_init.sql
+  - include:
+      file: db/changelog/migrations/02_car_brands_content.sql
+  - include:
+      file: db/changelog/migrations/03_car_models_init.sql
+  - include:
+      file: db/changelog/migrations/04_car_models_content.sql
+  - include:
+      file: db/changelog/migrations/05_car_spots_init.sql
