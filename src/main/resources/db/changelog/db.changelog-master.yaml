@@ -9,3 +9,7 @@ databaseChangeLog:
       file: db/changelog/migrations/04_car_models_content.sql
   - include:
       file: db/changelog/migrations/05_car_spots_init.sql
+  - include:
+      file: db/changelog/migrations/06_users_init.sql
+  - include:
+      file: db/changelog/migrations/07_verification_tokens_init.sql

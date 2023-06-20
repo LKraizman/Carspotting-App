@@ -8,6 +8,7 @@ import com.carspottingapp.repository.CarSpotRepository;
 import com.carspottingapp.model.CarModel;
 import com.carspottingapp.model.CarSpot;
 import com.carspottingapp.model.response.CarSpotResponse;
+import com.carspottingapp.service.request.NewCarSpotRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

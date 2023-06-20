@@ -2,10 +2,9 @@ package com.carspottingapp.сontroller;
 
 import com.carspottingapp.exception.InvalidIdException;
 import com.carspottingapp.exception.InvalidLengthException;
-import com.carspottingapp.model.response.CarBrandResponse;
 import com.carspottingapp.model.response.CarSpotResponse;
 import com.carspottingapp.service.CarSpotService;
-import com.carspottingapp.service.NewCarSpotRequest;
+import com.carspottingapp.service.request.NewCarSpotRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
