@@ -1,9 +1,15 @@
+---
 server:
   port: 5000
   error:
     include-message: always
-
 spring:
+  application:
+    name: spot-it
+  cloud:
+    config:
+      import: optional:configserver:http://localhost:8888
+      profile: prod
   datasource:
     url: jdbc:postgresql://localhost:5432/postgres
     username: chkyoslf
@@ -16,3 +22,15 @@ spring:
       show-sql: true
   main:
     web-application-type: servlet
+springdoc:
+  swagger-ui:
+    path: /spotit-documentation
+    try-it-out-enabled: true
+    operations-sorter: method
+    enabled: true
+  api-docs:
+    enabled: true
+    path: /spotit-api-docs
+carspotting:
+  openapi:
+    url: http://localhost:5000

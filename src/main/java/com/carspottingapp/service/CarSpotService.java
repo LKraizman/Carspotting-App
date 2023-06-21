@@ -1,5 +1,6 @@
 package com.carspottingapp.service;
 
+import com.carspottingapp.configuration.PropertyConfig;
 import com.carspottingapp.exception.InvalidIdException;
 import com.carspottingapp.exception.InvalidLengthException;
 import com.carspottingapp.repository.CarModelRepository;
@@ -17,8 +18,10 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class CarSpotService {
+
     public final CarSpotRepository carSpotRepository;
     public final CarModelRepository carModelRepository;
+    public final PropertyConfig propertyConfig;
 
     public List<CarSpotResponse> getCarSpots() {
         return carSpotRepository.findAll().stream().map(CarSpotResponse::new).toList();
@@ -30,9 +33,9 @@ public class CarSpotService {
     }
 
     public CarSpotResponse addCarSpot(NewCarSpotRequest request) throws InvalidLengthException {
-        if (request.carSpotTitle.length() > 30) {
+        if (request.carSpotTitle.length() > Integer.parseInt(propertyConfig.getTitleLimit())) {
             throw new InvalidLengthException();
-        } else if (request.description.length() > 300) {
+        } else if (request.description.length() > Integer.parseInt(propertyConfig.getDescriptionLimit())) {
             throw new InvalidLengthException();
         }
 
@@ -51,9 +54,9 @@ public class CarSpotService {
     }
 
     public CarSpotResponse editCarSpot(Long id, NewCarSpotRequest request) throws InvalidLengthException {
-        if (request.carSpotTitle.length() > 30) {
+        if (request.carSpotTitle.length() > Integer.parseInt(propertyConfig.getTitleLimit())) {
             throw new InvalidLengthException();
-        } else if (request.description.length() > 300) {
+        } else if (request.description.length() > Integer.parseInt(propertyConfig.getDescriptionLimit())) {
             throw new InvalidLengthException();
         }
 
