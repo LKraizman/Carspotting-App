@@ -5,9 +5,9 @@ import com.carspottingapp.exception.UserAlreadyExistException;
 import com.carspottingapp.model.CarSpotUser;
 import com.carspottingapp.model.CarSpotUserRole;
 import com.carspottingapp.model.ICarSpotUser;
+import com.carspottingapp.model.response.CarSpotUserResponse;
 import com.carspottingapp.model.token.VerificationToken;
 import com.carspottingapp.repository.CarSpotUserRepository;
-import com.carspottingapp.repository.VerificationTokenRepository;
 import com.carspottingapp.service.request.RegistrationRequest;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
@@ -76,8 +76,22 @@ public class CarSpotUserService implements ICarSpotUser {
     }
 
     @Override
-    public void resetUserPassword(CarSpotUser user, String newPassword) {
+    public void changePassword(CarSpotUser user, String newPassword) {
         user.setPassword(passwordEncoder.encode(newPassword));
         carSpotUserRepository.save(user);
+    }
+
+    @Override
+    public boolean oldPasswordIsValid(CarSpotUser user, String oldPassword){
+        return passwordEncoder.matches(oldPassword, user.getPassword());
+    }
+
+    public CarSpotUserResponse changeUserInformation(Long id, RegistrationRequest request){
+        CarSpotUser existUser = carSpotUserRepository.findById(id).get();
+        existUser.setUsername(request.getUserName());
+        existUser.setFirstName(request.getFirstName());
+        existUser.setLastName(request.getLastName());
+        CarSpotUser updatedUser = carSpotUserRepository.save(existUser);
+        return new CarSpotUserResponse(updatedUser);
     }
 }

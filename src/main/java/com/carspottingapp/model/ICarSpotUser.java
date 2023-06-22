@@ -1,6 +1,5 @@
 package com.carspottingapp.model;
 
-import com.carspottingapp.model.token.VerificationToken;
 import com.carspottingapp.service.request.RegistrationRequest;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,5 +17,7 @@ public interface ICarSpotUser {
 
     CarSpotUser findUserByPasswordToken(String passwordResetToken);
 
-    void resetUserPassword(CarSpotUser user, String newPassword);
+    void changePassword(CarSpotUser user, String newPassword);
+
+    boolean oldPasswordIsValid(CarSpotUser user, String oldPassword);
 }

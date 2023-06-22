@@ -7,7 +7,7 @@ import com.carspottingapp.model.token.VerificationToken;
 import com.carspottingapp.repository.VerificationTokenRepository;
 import com.carspottingapp.service.CarSpotUserService;
 import com.carspottingapp.service.TokenVerificationService;
-import com.carspottingapp.service.request.PasswordResetRequest;
+import com.carspottingapp.service.request.PasswordRequestUtil;
 import com.carspottingapp.service.request.RegistrationRequest;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -70,9 +70,9 @@ public class RegistrationController {
 
     @PostMapping("/password-reset-request")
     public String resetPasswordRequest(
-            @RequestBody PasswordResetRequest passwordResetRequest,
+            @RequestBody PasswordRequestUtil passwordRequestUtil,
             final HttpServletRequest request) throws MessagingException, UnsupportedEncodingException {
-        Optional<CarSpotUser> user = carSpotUserService.findByEmail(passwordResetRequest.getEmail());
+        Optional<CarSpotUser> user = carSpotUserService.findByEmail(passwordRequestUtil.getEmail());
         String passwordResetUrl = "";
         if(user.isPresent()){
             String passwordResetToken = UUID.randomUUID().toString();
@@ -83,7 +83,7 @@ public class RegistrationController {
     }
 
     @PostMapping("/reset-password")
-    public String resetPassword(@RequestBody PasswordResetRequest passwordResetRequest,
+    public String resetPassword(@RequestBody PasswordRequestUtil passwordRequestUtil,
                                 @RequestParam("token") String passwordResetToken){
         String tokenValidationResult = tokenVerificationService.validatePasswordResetToken(passwordResetToken);
         if(!tokenValidationResult.equalsIgnoreCase("valid")){
@@ -91,7 +91,7 @@ public class RegistrationController {
         }
         CarSpotUser user = carSpotUserService.findUserByPasswordToken(passwordResetToken);
         if(user != null){
-            carSpotUserService.resetUserPassword(user, passwordResetRequest.getNewPassword());
+            carSpotUserService.changePassword(user, passwordRequestUtil.getNewPassword());
             return "Password has been reset successfully";
         }
         return "Invalid password reset token";
@@ -105,6 +105,16 @@ public class RegistrationController {
         registrationCompleteEventListener.sendPasswordResetVerificationEmail(verificationUrl);
         log.info("Click the link to reset your password : {}", verificationUrl);
         return verificationUrl;
+    }
+
+    @PostMapping("/change-password")
+    public String changePassword(@RequestBody PasswordRequestUtil passwordRequestUtil){
+        CarSpotUser user = carSpotUserService.findByEmail(passwordRequestUtil.getEmail()).get();
+        if(!carSpotUserService.oldPasswordIsValid(user, passwordRequestUtil.getOldPassword())){
+            return "Incorrect user password";
+        }
+        carSpotUserService.changePassword(user, passwordRequestUtil.getNewPassword());
+        return "Password changed successfully";
     }
 
     public String applicationUrl(HttpServletRequest request) {
