@@ -14,8 +14,9 @@ public interface ICarSpotUser {
     List<CarSpotUser> getUsers();
     CarSpotUser registerUser(RegistrationRequest request);
     Optional<CarSpotUser> findByEmail(String email);
+    void createPasswordResetTokenForUser(CarSpotUser user, String passwordToken);
 
-    void saveUserVerificationToken(CarSpotUser carSpotUser, String verificationToken);
+    CarSpotUser findUserByPasswordToken(String passwordResetToken);
 
-    String validateToken(String verifiedToken);
+    void resetUserPassword(CarSpotUser user, String newPassword);
 }
