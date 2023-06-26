@@ -63,7 +63,7 @@ public class RegistrationController {
                 "<a href=\""+newVerificationUrl+"\"> Get a new verification link. </a>";
     }
 
-    @GetMapping("/resend-berification-token")
+    @GetMapping("/resend-verification-token")
     public String resendVerificationToken(
             @RequestParam("token") String oldToken,
             final HttpServletRequest request)
