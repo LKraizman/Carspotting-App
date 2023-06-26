@@ -1,6 +1,6 @@
 package com.carspottingapp.model.token;
 
-import com.carspottingapp.model.CarSpotUser;
+import com.carspottingapp.model.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,9 +30,9 @@ public class PasswordResetToken {
 
     @OneToOne
     @JoinColumn(name = "user_id")
-    private CarSpotUser user;
+    private User user;
 
-    public PasswordResetToken(String resetToken, CarSpotUser user) {
+    public PasswordResetToken(String resetToken, User user) {
         super();
         this.resetToken = resetToken;
         this.user = user;

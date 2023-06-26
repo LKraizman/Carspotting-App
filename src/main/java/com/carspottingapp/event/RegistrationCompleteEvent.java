@@ -1,18 +1,18 @@
 package com.carspottingapp.event;
 
-import com.carspottingapp.model.CarSpotUser;
+import com.carspottingapp.model.User;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.context.ApplicationEvent;
 
 @Getter @Setter
 public class RegistrationCompleteEvent extends ApplicationEvent {
-    private CarSpotUser carSpotUser;
+    private User user;
     private String applicationUrl;
 
-    public RegistrationCompleteEvent(CarSpotUser carSpotUser, String applicationUrl) {
-        super(carSpotUser);
-        this.carSpotUser = carSpotUser;
+    public RegistrationCompleteEvent(User user, String applicationUrl) {
+        super(user);
+        this.user = user;
         this.applicationUrl = applicationUrl;
     }
 }

@@ -5,10 +5,6 @@ server:
     include-binding-errors: always
 
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
-    username: chkyoslf
-    password: pass123
   jpa:
     properties:
       hibernate:
@@ -18,17 +14,7 @@ spring:
   main:
     web-application-type: servlet
     allow-bean-definition-overriding: true
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: spotitapplication@gmail.com
-    password: cvlpuwtrqjpucwql
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
+
 springdoc:
   swagger-ui:
     path: /spotit-documentation
@@ -38,6 +24,7 @@ springdoc:
   api-docs:
     enabled: true
     path: /spotit-api-docs
+
 carspotting:
   openapi:
     url: http://localhost:5000

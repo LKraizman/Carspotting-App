@@ -1,5 +1,5 @@
 package com.carspottingapp.model;
 
-public enum CarSpotUserRole {
+public enum UserRole {
     USER, ADMIN
 }

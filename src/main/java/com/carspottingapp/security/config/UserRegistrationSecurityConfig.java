@@ -9,7 +9,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-public class CarSpotUserRegistrationSecurityConfig {
+public class UserRegistrationSecurityConfig {
     @Bean
     public org.springframework.security.crypto.password.PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();

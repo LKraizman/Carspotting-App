@@ -1,7 +1,7 @@
 package com.carspottingapp.service;
 
-import com.carspottingapp.repository.CarSpotUserRepository;
-import com.carspottingapp.security.CarSpotUserRegistrationDetails;
+import com.carspottingapp.repository.UserRepository;
+import com.carspottingapp.security.UserRegistrationDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -10,14 +10,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class CarSpotUserRegistrationDetailsService implements UserDetailsService {
+public class UserRegistrationDetailsService implements UserDetailsService {
 
-    private final CarSpotUserRepository carSpotUserRepository;
+    private final UserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return carSpotUserRepository.findByEmail(email)
-                .map(CarSpotUserRegistrationDetails::new)
+        return userRepository.findByEmail(email)
+                .map(UserRegistrationDetails::new)
                 .orElseThrow(() -> new UsernameNotFoundException("User with this email not found"));
     }
 }

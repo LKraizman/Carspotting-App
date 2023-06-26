@@ -1,9 +1,9 @@
 package com.carspottingapp.service;
 
-import com.carspottingapp.model.CarSpotUser;
+import com.carspottingapp.model.User;
 import com.carspottingapp.model.token.IVerificationToken;
 import com.carspottingapp.model.token.VerificationToken;
-import com.carspottingapp.repository.CarSpotUserRepository;
+import com.carspottingapp.repository.UserRepository;
 import com.carspottingapp.repository.VerificationTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,12 +17,19 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TokenVerificationService implements IVerificationToken {
     private final VerificationTokenRepository verificationTokenRepository;
-    private final CarSpotUserRepository carSpotUserRepository;
+    private final UserRepository userRepository;
     private final PasswordResetTokenService passwordResetTokenService;
 
+    public VerificationToken isTokenExist(String token) {
+        VerificationToken verifiedToken = verificationTokenRepository.findByToken(token);
+        if (verifiedToken.getUser().getIsEnabled()) {
+            return null;
+        }
+        return verifiedToken;
+    }
     @Override
-    public void saveUserVerificationToken(CarSpotUser carSpotUser, String verificationToken) {
-        var verifiedToken = new VerificationToken(verificationToken,carSpotUser);
+    public void saveUserVerificationToken(User user, String verificationToken) {
+        var verifiedToken = new VerificationToken(verificationToken, user);
         verificationTokenRepository.save(verifiedToken);
     }
 
@@ -32,14 +39,14 @@ public class TokenVerificationService implements IVerificationToken {
         if(token == null){
             return "Invalid verification token";
         }
-        CarSpotUser user = token.getUser();
+        User user = token.getUser();
         Calendar calendar = Calendar.getInstance();
         if((token.getTokenExpirationTime().getTime() - calendar.getTime().getTime()) <= 0){
             verificationTokenRepository.delete(token);
             return "Token already expired.";
         }
         user.setIsEnabled(true);
-        carSpotUserRepository.save(user);
+        userRepository.save(user);
         return "valid";
     }
 

@@ -5,12 +5,11 @@ import lombok.*;
 import org.hibernate.annotations.NaturalId;
 
 @Getter @Setter
-@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "users")
-public class CarSpotUser{
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,7 +34,7 @@ public class CarSpotUser{
 
     @Column(name = "user_role")
     @Enumerated(EnumType.STRING)
-    private CarSpotUserRole carSpotUserRole;
+    private UserRole userRole;
 
     @Column(name = "is_enabled")
     private Boolean isEnabled = false;

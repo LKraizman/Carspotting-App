@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: spot-it
+  cloud:
+    config:
+      import: optional:configserver:http://localhost:8888
+      profile: dev

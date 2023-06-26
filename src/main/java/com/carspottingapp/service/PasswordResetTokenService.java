@@ -1,6 +1,6 @@
 package com.carspottingapp.service;
 
-import com.carspottingapp.model.CarSpotUser;
+import com.carspottingapp.model.User;
 import com.carspottingapp.model.token.PasswordResetToken;
 import com.carspottingapp.repository.PasswordResetTokenRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,8 +13,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class PasswordResetTokenService {
     private final PasswordResetTokenRepository passwordResetTokenRepository;
-    public void createPasswordResetTokenForUser(CarSpotUser carSpotUser, String passwordToken){
-        PasswordResetToken passwordResetToken = new PasswordResetToken(passwordToken, carSpotUser);
+    public void createPasswordResetTokenForUser(User user, String passwordToken){
+        PasswordResetToken passwordResetToken = new PasswordResetToken(passwordToken, user);
         passwordResetTokenRepository.save(passwordResetToken);
     }
 
@@ -23,7 +23,7 @@ public class PasswordResetTokenService {
         if(token == null){
             return "Invalid password reset token";
         }
-        CarSpotUser user = token.getUser();
+        User user = token.getUser();
         Calendar calendar = Calendar.getInstance();
         if((token.getTokenExpirationTime().getTime() - calendar.getTime().getTime()) <= 0){
             return "Link already expired";
@@ -31,7 +31,7 @@ public class PasswordResetTokenService {
         return "valid";
     }
 
-    public Optional<CarSpotUser> findUserByPasswordToken(String passwordToken){
+    public Optional<User> findUserByPasswordToken(String passwordToken){
         return Optional.ofNullable(passwordResetTokenRepository.findByResetToken(passwordToken).getUser());
     }
 }

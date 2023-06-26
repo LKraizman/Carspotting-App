@@ -1,6 +1,6 @@
 package com.carspottingapp.security;
 
-import com.carspottingapp.model.CarSpotUser;
+import com.carspottingapp.model.User;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,18 +12,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Data
-public class CarSpotUserRegistrationDetails implements UserDetails {
+public class UserRegistrationDetails implements UserDetails {
 
     private String userName;
     private String userPassword;
     private Boolean isEnabled;
     private List<GrantedAuthority> authorityList;
 
-    public CarSpotUserRegistrationDetails(CarSpotUser carSpotUser) {
-        this.userName = carSpotUser.getEmail();
-        this.userPassword = carSpotUser.getPassword();
-        this.isEnabled = carSpotUser.getIsEnabled();
-        this.authorityList = Arrays.stream(carSpotUser.getCarSpotUserRole().toString()
+    public UserRegistrationDetails(User user) {
+        this.userName = user.getEmail();
+        this.userPassword = user.getPassword();
+        this.isEnabled = user.getIsEnabled();
+        this.authorityList = Arrays.stream(user.getUserRole().toString()
                 .split(",")).map(SimpleGrantedAuthority::new).collect(Collectors.toList());
     }
 

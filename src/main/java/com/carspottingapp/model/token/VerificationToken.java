@@ -1,6 +1,6 @@
 package com.carspottingapp.model.token;
 
-import com.carspottingapp.model.CarSpotUser;
+import com.carspottingapp.model.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,9 +30,9 @@ public class VerificationToken {
 
     @OneToOne
     @JoinColumn(name = "user_id")
-    private CarSpotUser user;
+    private User user;
 
-    public VerificationToken(String token, CarSpotUser user) {
+    public VerificationToken(String token, User user) {
         super();
         this.token = token;
         this.user = user;

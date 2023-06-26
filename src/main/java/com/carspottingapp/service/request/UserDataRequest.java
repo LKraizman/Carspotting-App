@@ -2,11 +2,10 @@ package com.carspottingapp.service.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.ToString;
 
 @Getter
 @AllArgsConstructor
-public class RegistrationRequest{
+public class UserDataRequest {
 
     private String firstName;
     private String lastName;
