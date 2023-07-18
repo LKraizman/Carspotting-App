@@ -1,4 +1,4 @@
-package com.carspottingapp.сontroller;
+package com.carspottingapp.controller;
 
 import com.carspottingapp.event.RegistrationCompleteEvent;
 import com.carspottingapp.event.listener.RegistrationCompleteEventListener;
@@ -10,6 +10,12 @@ import com.carspottingapp.service.UserService;
 import com.carspottingapp.service.TokenVerificationService;
 import com.carspottingapp.service.request.PasswordRequest;
 import com.carspottingapp.service.request.UserDataRequest;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -24,17 +30,27 @@ import java.io.UnsupportedEncodingException;
 import java.util.Optional;
 import java.util.UUID;
 
+@Tag(name = "User registration and verification", description = "Users management API")
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/register")
-public class RegistrationController {
+public class AuthenticationController {
     private final UserService userService;
     private final ApplicationEventPublisher publisher;
     private final RegistrationCompleteEventListener registrationCompleteEventListener;
     private final HttpServletRequest servletRequest;
     private final TokenVerificationService tokenVerificationService;
 
+
+    @Operation(
+            summary = "User registration",
+            description = "Registration request for new users"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",
+                    content = {@Content(schema = @Schema(implementation = UserResponse.class),
+                            mediaType = "application/json")})})
     @PostMapping
     public ResponseEntity<UserResponse> registerUser(
             @RequestBody UserDataRequest registrationRequest,
@@ -49,6 +65,12 @@ public class RegistrationController {
         }
     }
 
+    @Operation(
+            summary = "User account verification",
+            description = "Verification by link"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200")})
     @GetMapping("/verifyEmail")
     public String verifyEmail(@RequestParam("token")String token){
         String newVerificationUrl = applicationUrl(servletRequest)+"/register/resend-verification-token?token="+token;
@@ -63,6 +85,12 @@ public class RegistrationController {
                 "<a href=\""+newVerificationUrl+"\"> Get a new verification link. </a>";
     }
 
+    @Operation(
+            summary = "New verification link",
+            description = "Send a new verification link, if the oldest is expired"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200")})
     @GetMapping("/resend-verification-token")
     public String resendVerificationToken(
             @RequestParam("token") String oldToken,
@@ -74,54 +102,7 @@ public class RegistrationController {
         return "A new verification link has been sent to your email";
     }
 
-    @PostMapping("/password-reset-request")
-    public String resetPasswordRequest(
-            @RequestBody PasswordRequest passwordRequestUtil,
-            final HttpServletRequest request) throws MessagingException, UnsupportedEncodingException {
-        Optional<User> user = userService.findByEmail(passwordRequestUtil.getEmail());
-        String passwordResetUrl = "";
-        if(user.isPresent()){
-            String passwordResetToken = UUID.randomUUID().toString();
-            userService.createPasswordResetTokenForUser(user.get(), passwordResetToken);
-            passwordResetUrl = passwordResetEmailLink(user.get(), applicationUrl(request), passwordResetToken);
-        }
-        return passwordResetUrl;
-    }
 
-    @PostMapping("/reset-password")
-    public String resetPassword(@RequestBody PasswordRequest passwordRequestUtil,
-                                @RequestParam("token") String passwordResetToken){
-        String tokenValidationResult = tokenVerificationService.validatePasswordResetToken(passwordResetToken);
-        if(!tokenValidationResult.equalsIgnoreCase("valid")){
-            return "Invalid password reset token";
-        }
-        User user = userService.findUserByPasswordToken(passwordResetToken);
-        if(user != null){
-            userService.changePassword(user, passwordRequestUtil.getNewPassword());
-            return "Password has been reset successfully";
-        }
-        return "Invalid password reset token";
-    }
-    private String passwordResetEmailLink(
-            User user,
-            String applicationUrl,
-            String passwordResetToken)
-            throws MessagingException, UnsupportedEncodingException {
-        String verificationUrl = applicationUrl+"/api/register/reset-password?token="+passwordResetToken;
-        registrationCompleteEventListener.sendPasswordResetVerificationEmail(verificationUrl);
-        log.info("Click the link to reset your password : {}", verificationUrl);
-        return verificationUrl;
-    }
-
-    @PostMapping("/change-password")
-    public String changePassword(@RequestBody PasswordRequest passwordRequestUtil){
-        User user = userService.findByEmail(passwordRequestUtil.getEmail()).get();
-        if(!userService.oldPasswordIsValid(user, passwordRequestUtil.getOldPassword())){
-            return "Incorrect user password";
-        }
-        userService.changePassword(user, passwordRequestUtil.getNewPassword());
-        return "Password changed successfully";
-    }
 
     public String applicationUrl(HttpServletRequest request) {
         return "http://"+request.getServerName()+":"+request.getServerPort()+request.getContextPath();

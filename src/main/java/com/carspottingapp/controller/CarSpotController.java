@@ -1,4 +1,4 @@
-package com.carspottingapp.сontroller;
+package com.carspottingapp.controller;
 
 import com.carspottingapp.exception.InvalidIdException;
 import com.carspottingapp.exception.InvalidLengthException;

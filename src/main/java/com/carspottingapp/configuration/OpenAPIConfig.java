@@ -26,7 +26,7 @@ public class OpenAPIConfig {
         Contact contact = new Contact();
         contact.setEmail("checkyoslf@gmail.com");
         contact.setName("L.Kraizman");
-        contact.setUrl("www.google.com");
+        contact.setUrl("in progress");
 
         License mitlecense = new License().name("MIT License").url("https://choosealicense.com/licenses/mit/");
 
