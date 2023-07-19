@@ -43,11 +43,11 @@ public class CarSpotService {
         Optional<CarModel> carModelById = carModelRepository.findById(request.carModelId);
 
         CarSpot newCarSpot = carModelById.map(model -> new CarSpot(
-                request.carSpotTitle,
-                request.description,
-                request.pictureUrl,
-                model,
-                LocalDateTime.now()))
+                        request.carSpotTitle,
+                        request.description,
+                        request.pictureUrl,
+                        model,
+                        LocalDateTime.now()))
                 .orElseThrow(InvalidIdException::new);
 
         CarSpot saveSpot = carSpotRepository.save(newCarSpot);

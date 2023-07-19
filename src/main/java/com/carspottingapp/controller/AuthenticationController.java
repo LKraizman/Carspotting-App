@@ -1,14 +1,12 @@
 package com.carspottingapp.controller;
 
 import com.carspottingapp.event.RegistrationCompleteEvent;
-import com.carspottingapp.event.listener.RegistrationCompleteEventListener;
 import com.carspottingapp.exception.InvalidIdException;
 import com.carspottingapp.model.User;
 import com.carspottingapp.model.response.UserResponse;
 import com.carspottingapp.model.token.VerificationToken;
 import com.carspottingapp.service.UserService;
 import com.carspottingapp.service.TokenVerificationService;
-import com.carspottingapp.service.request.PasswordRequest;
 import com.carspottingapp.service.request.UserDataRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -20,6 +18,7 @@ import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.hc.core5.net.URIBuilder;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,8 +26,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Optional;
-import java.util.UUID;
 
 @Tag(name = "User registration and verification", description = "Users management API")
 @Slf4j
@@ -38,10 +35,8 @@ import java.util.UUID;
 public class AuthenticationController {
     private final UserService userService;
     private final ApplicationEventPublisher publisher;
-    private final RegistrationCompleteEventListener registrationCompleteEventListener;
     private final HttpServletRequest servletRequest;
     private final TokenVerificationService tokenVerificationService;
-
 
     @Operation(
             summary = "User registration",
@@ -54,7 +49,7 @@ public class AuthenticationController {
     @PostMapping
     public ResponseEntity<UserResponse> registerUser(
             @RequestBody UserDataRequest registrationRequest,
-            final HttpServletRequest request){
+            final HttpServletRequest request) {
         User user = userService.registerUser(registrationRequest);
         publisher.publishEvent(new RegistrationCompleteEvent(user, applicationUrl(request)));
         try {
@@ -72,17 +67,21 @@ public class AuthenticationController {
     @ApiResponses({
             @ApiResponse(responseCode = "200")})
     @GetMapping("/verifyEmail")
-    public String verifyEmail(@RequestParam("token")String token){
-        String newVerificationUrl = applicationUrl(servletRequest)+"/register/resend-verification-token?token="+token;
-        if(tokenVerificationService.isTokenExist(token) == null){
+    public String verifyEmail(@RequestParam("token") String token) {
+        String newVerificationUrl = String.format(
+                "%s/register/resend-verification-token?token=%s",
+                applicationUrl(servletRequest),
+                token);
+        if (tokenVerificationService.isTokenExist(token) == null) {
             return "This account is already verified. Try login";
         }
         String verificationResult = tokenVerificationService.validateToken(token);
-        if(verificationResult.equalsIgnoreCase("valid")){
+        if (verificationResult.equalsIgnoreCase("valid")) {
             return "You account successfully verified. Now you can login to your account.";
         }
-        return "Invalid verification link. Please regenerate the verification response: " +
-                "<a href=\""+newVerificationUrl+"\"> Get a new verification link. </a>";
+        return String.format("Invalid verification link. " +
+                "Please regenerate the verification response: " +
+                "<a href=\"%s\">Get a new verification link. </a>", newVerificationUrl);
     }
 
     @Operation(
@@ -102,10 +101,12 @@ public class AuthenticationController {
         return "A new verification link has been sent to your email";
     }
 
-
-
     public String applicationUrl(HttpServletRequest request) {
-        return "http://"+request.getServerName()+":"+request.getServerPort()+request.getContextPath();
+        URIBuilder requestUrlBuilder = new URIBuilder()
+                .setScheme("http")
+                .setHost(request.getServerName())
+                .setPort(request.getServerPort())
+                .setPath(request.getContextPath());
+        return requestUrlBuilder.toString();
     }
-
 }

@@ -27,6 +27,7 @@ public class TokenVerificationService implements IVerificationToken {
         }
         return verifiedToken;
     }
+
     @Override
     public void saveUserVerificationToken(User user, String verificationToken) {
         var verifiedToken = new VerificationToken(verificationToken, user);
@@ -36,12 +37,12 @@ public class TokenVerificationService implements IVerificationToken {
     @Override
     public String validateToken(String verifiedToken) {
         VerificationToken token = verificationTokenRepository.findByToken(verifiedToken);
-        if(token == null){
+        if (token == null) {
             return "Invalid verification token";
         }
         User user = token.getUser();
         Calendar calendar = Calendar.getInstance();
-        if((token.getTokenExpirationTime().getTime() - calendar.getTime().getTime()) <= 0){
+        if ((token.getTokenExpirationTime().getTime() - calendar.getTime().getTime()) <= 0) {
             verificationTokenRepository.delete(token);
             return "Token already expired.";
         }

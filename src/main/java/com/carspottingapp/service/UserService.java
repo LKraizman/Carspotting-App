@@ -1,17 +1,16 @@
 package com.carspottingapp.service;
 
-import com.carspottingapp.event.listener.RegistrationCompleteEventListener;
 import com.carspottingapp.exception.InvalidIdException;
 import com.carspottingapp.exception.UserAlreadyExistException;
 import com.carspottingapp.exception.UserNotFoundException;
 import com.carspottingapp.model.User;
 import com.carspottingapp.model.UserRole;
 import com.carspottingapp.model.UserActions;
-import com.carspottingapp.model.response.CarSpotResponse;
 import com.carspottingapp.model.response.UserResponse;
 import com.carspottingapp.model.token.VerificationToken;
 import com.carspottingapp.repository.UserRepository;
 import com.carspottingapp.service.request.UserDataRequest;
+import com.carspottingapp.utils.EmailContent;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,8 +28,9 @@ public class UserService implements UserActions {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final RegistrationCompleteEventListener registrationCompleteEventListener;
     private final PasswordResetTokenService passwordResetTokenService;
+    private final EmailSender emailSender;
+    private final EmailContent emailContent;
 
     @Override
     public List<User> getUsers() {
@@ -58,12 +58,17 @@ public class UserService implements UserActions {
         return userRepository.findByEmail(email);
     }
 
+    @Override
+    public UserResponse findById(Long id) {
+        return userRepository.findById(id).map(UserResponse::new).orElseThrow(InvalidIdException::new);
+    }
+
     public void resendVerificationTokenEmail(
             User theUser,
             String applicationUrl,
             VerificationToken verificationToken) throws MessagingException, UnsupportedEncodingException {
         String verificationUrl = applicationUrl + "/api/register/verifyEmail?token=" + verificationToken.getToken();
-        registrationCompleteEventListener.sendVerificationEmail(verificationUrl);
+        emailSender.sendEmail(verificationUrl, theUser, emailContent.getACCOUNT_VERIFICATION_TITLE());
         log.info("Click the link to complete your registration : {}", verificationUrl);
     }
 
@@ -98,7 +103,7 @@ public class UserService implements UserActions {
         return new UserResponse(updatedUser);
     }
 
-    public UserResponse getUserById(Long id){
+    public UserResponse getUserById(Long id) {
         return userRepository.findById(id).map(UserResponse::new).
                 orElseThrow(InvalidIdException::new);
     }

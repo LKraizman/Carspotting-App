@@ -1,13 +1,14 @@
 package com.carspottingapp.controller;
 
-import com.carspottingapp.event.listener.RegistrationCompleteEventListener;
 import com.carspottingapp.exception.InvalidIdException;
 import com.carspottingapp.model.User;
 import com.carspottingapp.model.response.UserResponse;
+import com.carspottingapp.service.EmailSender;
 import com.carspottingapp.service.TokenVerificationService;
 import com.carspottingapp.service.UserService;
 import com.carspottingapp.service.request.PasswordRequest;
 import com.carspottingapp.service.request.UserDataRequest;
+import com.carspottingapp.utils.EmailContent;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -18,6 +19,7 @@ import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.hc.core5.net.URIBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,8 +38,8 @@ import java.util.UUID;
 public class UserController {
     private final UserService userService;
     private final TokenVerificationService tokenVerificationService;
-    private final RegistrationCompleteEventListener registrationCompleteEventListener;
-
+    private final EmailSender emailSender;
+    private final EmailContent emailContent;
 
     @Operation(
             summary = "Retrieve all users",
@@ -52,16 +54,33 @@ public class UserController {
         return new ResponseEntity<>(userService.getUsers(), HttpStatus.OK);
     }
 
-
     @Operation(
             summary = "Retrieve specified user by ID",
-            description = "Get information about user"
+            description = "Get user profile information for one particular user"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200",
                     content = {@Content(schema = @Schema(implementation = UserResponse.class),
                             mediaType = "application/json")})})
     @GetMapping("/{userId}")
+    public ResponseEntity<UserResponse> getUserInformation(@PathVariable("userId") Long id) {
+        try {
+            return new ResponseEntity<>(userService.findById(id), HttpStatus.OK);
+        } catch (InvalidIdException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "User not found", e);
+        }
+    }
+
+    @Operation(
+            summary = "Edit user information ID",
+            description = "Update user profile information"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",
+                    content = {@Content(schema = @Schema(implementation = UserResponse.class),
+                            mediaType = "application/json")})})
+    @PutMapping("/{userId}")
     public ResponseEntity<UserResponse> updateUserInformation(@PathVariable("userId") Long id,
                                                               @RequestBody UserDataRequest updateUserDataRequest) {
         try {
@@ -84,7 +103,7 @@ public class UserController {
             final HttpServletRequest request) throws MessagingException, UnsupportedEncodingException {
         Optional<User> user = userService.findByEmail(passwordRequestUtil.getEmail());
         String passwordResetUrl = "";
-        if(user.isPresent()){
+        if (user.isPresent()) {
             String passwordResetToken = UUID.randomUUID().toString();
             userService.createPasswordResetTokenForUser(user.get(), passwordResetToken);
             passwordResetUrl = passwordResetEmailLink(user.get(), applicationUrl(request), passwordResetToken);
@@ -100,25 +119,29 @@ public class UserController {
             @ApiResponse(responseCode = "200")})
     @PostMapping("/reset-password")
     public String resetPassword(@RequestBody PasswordRequest passwordRequestUtil,
-                                @RequestParam("token") String passwordResetToken){
+                                @RequestParam("token") String passwordResetToken) {
         String tokenValidationResult = tokenVerificationService.validatePasswordResetToken(passwordResetToken);
-        if(!tokenValidationResult.equalsIgnoreCase("valid")){
+        if (!tokenValidationResult.equalsIgnoreCase("valid")) {
             return "Invalid password reset token";
         }
         User user = userService.findUserByPasswordToken(passwordResetToken);
-        if(user != null){
+        if (user != null) {
             userService.changePassword(user, passwordRequestUtil.getNewPassword());
             return "Password has been reset successfully";
         }
         return "Invalid password reset token";
     }
+
     private String passwordResetEmailLink(
             User user,
             String applicationUrl,
             String passwordResetToken)
             throws MessagingException, UnsupportedEncodingException {
-        String verificationUrl = applicationUrl+"/api/register/reset-password?token="+passwordResetToken;
-        registrationCompleteEventListener.sendPasswordResetVerificationEmail(verificationUrl);
+        String verificationUrl = String.format(
+                "%s/api/users/reset-password?token=%s",
+                applicationUrl,
+                passwordResetToken);
+        emailSender.sendEmail(verificationUrl, user, emailContent.getPASSWORD_RESET_TITLE());
         log.info("Click the link to reset your password : {}", verificationUrl);
         return verificationUrl;
     }
@@ -130,9 +153,9 @@ public class UserController {
     @ApiResponses({
             @ApiResponse(responseCode = "200")})
     @PostMapping("/change-password")
-    public String changePassword(@RequestBody PasswordRequest passwordRequestUtil){
+    public String changePassword(@RequestBody PasswordRequest passwordRequestUtil) {
         User user = userService.findByEmail(passwordRequestUtil.getEmail()).get();
-        if(!userService.oldPasswordIsValid(user, passwordRequestUtil.getOldPassword())){
+        if (!userService.oldPasswordIsValid(user, passwordRequestUtil.getOldPassword())) {
             return "Incorrect user password";
         }
         userService.changePassword(user, passwordRequestUtil.getNewPassword());
@@ -140,6 +163,11 @@ public class UserController {
     }
 
     public String applicationUrl(HttpServletRequest request) {
-        return "http://"+request.getServerName()+":"+request.getServerPort()+request.getContextPath();
+        URIBuilder requestUrlBuilder = new URIBuilder()
+                .setScheme("http")
+                .setHost(request.getServerName())
+                .setPort(request.getServerPort())
+                .setPath(request.getContextPath());
+        return requestUrlBuilder.toString();
     }
 }

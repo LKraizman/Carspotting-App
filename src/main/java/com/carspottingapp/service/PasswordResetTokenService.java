@@ -13,25 +13,26 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class PasswordResetTokenService {
     private final PasswordResetTokenRepository passwordResetTokenRepository;
-    public void createPasswordResetTokenForUser(User user, String passwordToken){
+
+    public void createPasswordResetTokenForUser(User user, String passwordToken) {
         PasswordResetToken passwordResetToken = new PasswordResetToken(passwordToken, user);
         passwordResetTokenRepository.save(passwordResetToken);
     }
 
-    public String validatePasswordResetToken(String verifiedToken){
+    public String validatePasswordResetToken(String verifiedToken) {
         PasswordResetToken token = passwordResetTokenRepository.findByResetToken(verifiedToken);
-        if(token == null){
+        if (token == null) {
             return "Invalid password reset token";
         }
         User user = token.getUser();
         Calendar calendar = Calendar.getInstance();
-        if((token.getTokenExpirationTime().getTime() - calendar.getTime().getTime()) <= 0){
+        if ((token.getTokenExpirationTime().getTime() - calendar.getTime().getTime()) <= 0) {
             return "Link already expired";
         }
         return "valid";
     }
 
-    public Optional<User> findUserByPasswordToken(String passwordToken){
+    public Optional<User> findUserByPasswordToken(String passwordToken) {
         return Optional.ofNullable(passwordResetTokenRepository.findByResetToken(passwordToken).getUser());
     }
 }

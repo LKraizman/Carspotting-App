@@ -1,5 +1,6 @@
 package com.carspottingapp.model;
 
+import com.carspottingapp.model.response.UserResponse;
 import com.carspottingapp.service.request.UserDataRequest;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,8 @@ public interface UserActions {
     User registerUser(UserDataRequest request);
 
     Optional<User> findByEmail(String email);
+
+    UserResponse findById(Long id);
 
     void createPasswordResetTokenForUser(User user, String passwordToken);
 

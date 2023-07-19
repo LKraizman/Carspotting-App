@@ -18,7 +18,7 @@ public class OpenAPIConfig {
     private String url;
 
     @Bean
-    public OpenAPI carspottingAPI(){
+    public OpenAPI carspottingAPI() {
         Server devServer = new Server();
         devServer.setUrl(url);
         devServer.description("Server URL");
