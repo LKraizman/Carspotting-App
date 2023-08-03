@@ -1,7 +1,7 @@
 package com.carspottingapp.service;
 
 import com.carspottingapp.model.User;
-import com.carspottingapp.utils.EmailContent;
+import com.carspottingapp.utils.EmailTemplate;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -16,15 +16,14 @@ import java.io.UnsupportedEncodingException;
 public class EmailSender {
 
     private final JavaMailSender javaMailSender;
-    private final EmailContent emailContent;
 
     public void sendEmail(String url, User user, String title) throws MessagingException, UnsupportedEncodingException {
         MimeMessage message = javaMailSender.createMimeMessage();
         var messageHelper = new MimeMessageHelper(message);
-        messageHelper.setFrom("spotitapplication@gmail.com", emailContent.getEMAIL_TITLE());
+        messageHelper.setFrom("spotitapplication@gmail.com", EmailTemplate.EMAIL_TITLE);
         messageHelper.setTo(user.getEmail());
         messageHelper.setSubject(title);
-        messageHelper.setText(emailContent.emailContentConfigurator(user, url, title), true);
+        messageHelper.setText(EmailTemplate.emailContentConfigurator(user, url, title), true);
         javaMailSender.send(message);
     }
 }

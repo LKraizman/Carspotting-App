@@ -1,11 +1,12 @@
 package com.carspottingapp.service.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.*;
 
-@Getter
+@Data
+@Builder
 @AllArgsConstructor
-public class UserDataRequest {
+@NoArgsConstructor
+public class UserRegistrationRequest {
 
     private String firstName;
     private String lastName;

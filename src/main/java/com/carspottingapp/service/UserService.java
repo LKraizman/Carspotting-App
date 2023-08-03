@@ -1,24 +1,22 @@
 package com.carspottingapp.service;
 
 import com.carspottingapp.exception.InvalidIdException;
-import com.carspottingapp.exception.UserAlreadyExistException;
-import com.carspottingapp.exception.UserNotFoundException;
 import com.carspottingapp.model.User;
-import com.carspottingapp.model.UserRole;
 import com.carspottingapp.model.UserActions;
 import com.carspottingapp.model.response.UserResponse;
-import com.carspottingapp.model.token.VerificationToken;
+import com.carspottingapp.model.response.UserResponseWithToken;
+import com.carspottingapp.repository.AccessTokenRepository;
 import com.carspottingapp.repository.UserRepository;
-import com.carspottingapp.service.request.UserDataRequest;
-import com.carspottingapp.utils.EmailContent;
-import jakarta.mail.MessagingException;
+import com.carspottingapp.service.request.PasswordRequest;
+import com.carspottingapp.service.request.UserRegistrationRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -28,59 +26,21 @@ public class UserService implements UserActions {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final PasswordResetTokenService passwordResetTokenService;
-    private final EmailSender emailSender;
-    private final EmailContent emailContent;
+    private final UserAuthenticationService userAuthenticationService;
+    private final AccessTokenRepository tokenRepository;
 
-    @Override
-    public List<User> getUsers() {
-        return userRepository.findAll();
-    }
-
-    @Override
-    public User registerUser(UserDataRequest request) {
-        Optional<User> carSpotUser = userRepository.findByEmail(request.getEmail());
-        if (carSpotUser.isPresent()) {
-            throw new UserAlreadyExistException("User with email" + request.getEmail() + " already exist");
-        }
-        var newUser = new User();
-        newUser.setFirstName(request.getFirstName());
-        newUser.setLastName(request.getLastName());
-        newUser.setUsername(request.getUserName());
-        newUser.setEmail(request.getEmail());
-        newUser.setPassword(passwordEncoder.encode(request.getPassword()));
-        newUser.setUserRole(UserRole.USER);
-        return userRepository.save(newUser);
+    public List<UserResponse> getUsers() {
+        return userRepository.findAll().stream().map(UserResponse::new).toList();
     }
 
     @Override
     public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
+        return userRepository.findByUsername(email);
     }
 
     @Override
     public UserResponse findById(Long id) {
         return userRepository.findById(id).map(UserResponse::new).orElseThrow(InvalidIdException::new);
-    }
-
-    public void resendVerificationTokenEmail(
-            User theUser,
-            String applicationUrl,
-            VerificationToken verificationToken) throws MessagingException, UnsupportedEncodingException {
-        String verificationUrl = applicationUrl + "/api/register/verifyEmail?token=" + verificationToken.getToken();
-        emailSender.sendEmail(verificationUrl, theUser, emailContent.getACCOUNT_VERIFICATION_TITLE());
-        log.info("Click the link to complete your registration : {}", verificationUrl);
-    }
-
-    @Override
-    public void createPasswordResetTokenForUser(User user, String passwordToken) {
-        passwordResetTokenService.createPasswordResetTokenForUser(user, passwordToken);
-    }
-
-    @Override
-    public User findUserByPasswordToken(String passwordResetToken) {
-        return passwordResetTokenService.findUserByPasswordToken(passwordResetToken)
-                .orElseThrow(UserNotFoundException::new);
     }
 
     @Override
@@ -94,17 +54,29 @@ public class UserService implements UserActions {
         return passwordEncoder.matches(oldPassword, user.getPassword());
     }
 
-    public UserResponse changeUserInformation(Long id, UserDataRequest request) {
+    public UserResponseWithToken changeUserInformation(
+            Long id,
+            UserRegistrationRequest updateUserInformationRequest)
+            throws IOException {
         User existUser = userRepository.findById(id).orElseThrow(InvalidIdException::new);
-        existUser.setUsername(request.getUserName());
-        existUser.setFirstName(request.getFirstName());
-        existUser.setLastName(request.getLastName());
-        User updatedUser = userRepository.save(existUser);
-        return new UserResponse(updatedUser);
+        existUser.setUsername(updateUserInformationRequest.getUserName());
+        existUser.setFirstName(updateUserInformationRequest.getFirstName());
+        existUser.setLastName(updateUserInformationRequest.getLastName());
+        userRepository.save(existUser);
+        userAuthenticationService.refreshUserToken(existUser);
+        String updatedToken = tokenRepository.findAllValidTokenByUser(existUser.getId()).get(0).getToken();
+        return new UserResponseWithToken(existUser, updatedToken);
     }
 
-    public UserResponse getUserById(Long id) {
-        return userRepository.findById(id).map(UserResponse::new).
-                orElseThrow(InvalidIdException::new);
+    public String userPasswordChangeResponse(PasswordRequest passwordRequestUtil, Long id) {
+        if (!Objects.equals(passwordRequestUtil.getOldPassword(), passwordRequestUtil.getOldPasswordRepeat())) {
+            return "The passwords don't match";
+        }
+        User user = userRepository.findById(id).get();
+        if (!oldPasswordIsValid(user, passwordRequestUtil.getOldPassword())) {
+            return "Incorrect user password";
+        }
+        changePassword(user, passwordRequestUtil.getNewPassword());
+        return "Password changed successfully";
     }
 }

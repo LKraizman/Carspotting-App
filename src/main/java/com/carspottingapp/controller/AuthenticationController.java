@@ -1,13 +1,10 @@
 package com.carspottingapp.controller;
 
-import com.carspottingapp.event.RegistrationCompleteEvent;
-import com.carspottingapp.exception.InvalidIdException;
-import com.carspottingapp.model.User;
-import com.carspottingapp.model.response.UserResponse;
-import com.carspottingapp.model.token.VerificationToken;
-import com.carspottingapp.service.UserService;
-import com.carspottingapp.service.TokenVerificationService;
-import com.carspottingapp.service.request.UserDataRequest;
+import com.carspottingapp.model.response.AuthenticationResponse;
+import com.carspottingapp.service.request.PasswordRequest;
+import com.carspottingapp.service.request.UserAuthenticationRequest;
+import com.carspottingapp.service.UserAuthenticationService;
+import com.carspottingapp.service.request.UserRegistrationRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -16,27 +13,19 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.hc.core5.net.URIBuilder;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 
-@Tag(name = "User registration and verification", description = "Users management API")
-@Slf4j
+@Tag(name = "User registration, verification and authentication", description = "Users management API")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/register")
+@RequestMapping("/api/auth")
 public class AuthenticationController {
-    private final UserService userService;
-    private final ApplicationEventPublisher publisher;
-    private final HttpServletRequest servletRequest;
-    private final TokenVerificationService tokenVerificationService;
+    private final UserAuthenticationService userAuthenticationService;
 
     @Operation(
             summary = "User registration",
@@ -44,20 +33,13 @@ public class AuthenticationController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200",
-                    content = {@Content(schema = @Schema(implementation = UserResponse.class),
+                    content = {@Content(schema = @Schema(implementation = AuthenticationResponse.class),
                             mediaType = "application/json")})})
-    @PostMapping
-    public ResponseEntity<UserResponse> registerUser(
-            @RequestBody UserDataRequest registrationRequest,
-            final HttpServletRequest request) {
-        User user = userService.registerUser(registrationRequest);
-        publisher.publishEvent(new RegistrationCompleteEvent(user, applicationUrl(request)));
-        try {
-            return new ResponseEntity<>(userService.getUserById(user.getId()), HttpStatus.OK);
-        } catch (InvalidIdException e) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "User not found", e);
-        }
+    @PostMapping("/register")
+    public ResponseEntity<AuthenticationResponse> registerUser(
+            @RequestBody UserRegistrationRequest registrationRequest,
+            final HttpServletRequest httpServletRequest) {
+        return ResponseEntity.ok(userAuthenticationService.register(registrationRequest, httpServletRequest));
     }
 
     @Operation(
@@ -66,47 +48,59 @@ public class AuthenticationController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200")})
-    @GetMapping("/verifyEmail")
+    @PostMapping("/verifyEmail")
     public String verifyEmail(@RequestParam("token") String token) {
-        String newVerificationUrl = String.format(
-                "%s/register/resend-verification-token?token=%s",
-                applicationUrl(servletRequest),
-                token);
-        if (tokenVerificationService.isTokenExist(token) == null) {
-            return "This account is already verified. Try login";
-        }
-        String verificationResult = tokenVerificationService.validateToken(token);
-        if (verificationResult.equalsIgnoreCase("valid")) {
-            return "You account successfully verified. Now you can login to your account.";
-        }
-        return String.format("Invalid verification link. " +
-                "Please regenerate the verification response: " +
-                "<a href=\"%s\">Get a new verification link. </a>", newVerificationUrl);
+        return userAuthenticationService.userVerification(token);
     }
 
     @Operation(
-            summary = "New verification link",
-            description = "Send a new verification link, if the oldest is expired"
+            summary = "User login",
+            description = "Login by authentication"
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200")})
-    @GetMapping("/resend-verification-token")
-    public String resendVerificationToken(
-            @RequestParam("token") String oldToken,
-            final HttpServletRequest request)
-            throws MessagingException, UnsupportedEncodingException {
-        VerificationToken verificationToken = tokenVerificationService.generateNewVerificationToken(oldToken);
-        User theUser = verificationToken.getUser();
-        userService.resendVerificationTokenEmail(theUser, applicationUrl(request), verificationToken);
-        return "A new verification link has been sent to your email";
+    @PostMapping("/authenticate")
+    public ResponseEntity<AuthenticationResponse> authenticateUser(
+            @RequestBody UserAuthenticationRequest authenticationRequest) {
+        return ResponseEntity.ok(userAuthenticationService.authenticate(authenticationRequest));
     }
 
-    public String applicationUrl(HttpServletRequest request) {
-        URIBuilder requestUrlBuilder = new URIBuilder()
-                .setScheme("http")
-                .setHost(request.getServerName())
-                .setPort(request.getServerPort())
-                .setPath(request.getContextPath());
-        return requestUrlBuilder.toString();
+    @Operation(
+            summary = "Refresh access tokens",
+            description = "Refresh access tokens for any reasons"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200")})
+    @PostMapping("/refresh-token")
+    public void refreshToken(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws IOException {
+        userAuthenticationService.refreshToken(request, response);
+    }
+
+    @Operation(
+            summary = "Password reset request",
+            description = "Get a password reset URL if the user forgets password"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200")})
+    @PostMapping("/password-reset-request")
+    public String resetPasswordRequest(
+            @RequestBody PasswordRequest passwordResetRequest,
+            final HttpServletRequest request) throws MessagingException, IOException {
+        return userAuthenticationService.passwordResetSender(passwordResetRequest, request);
+    }
+
+    @Operation(
+            summary = "Password reset action",
+            description = "Change the user's password in the service database"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200")})
+    @PostMapping("/reset-password")
+    public String resetPassword(@RequestBody PasswordRequest passwordRequestUtil,
+                                @RequestParam("token") String passwordResetToken) {
+        return userAuthenticationService.setNewUserPassword(passwordRequestUtil, passwordResetToken);
     }
 }

@@ -12,6 +12,4 @@ databaseChangeLog:
   - include:
       file: db/changelog/migrations/06_users_init.sql
   - include:
-      file: db/changelog/migrations/07_verification_tokens_init.sql
-  - include:
-      file: db/changelog/migrations/08_password_reset_tokens_init.sql
+      file: db/changelog/migrations/07_access_tokens_init.sql
