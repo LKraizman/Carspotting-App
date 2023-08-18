@@ -1,7 +1,6 @@
 package com.carspottingapp.controller;
 
 import com.carspottingapp.exception.InvalidIdException;
-import com.carspottingapp.model.response.AuthenticationResponse;
 import com.carspottingapp.model.response.UserResponse;
 import com.carspottingapp.model.response.UserResponseWithToken;
 import com.carspottingapp.service.UserService;
@@ -41,13 +40,7 @@ public class UserController {
                             mediaType = "application/json")})})
     @GetMapping
     public ResponseEntity<List<UserResponse>> getUsers() {
-        try {
-            return new ResponseEntity<>(userService.getUsers(), HttpStatus.OK);
-        } catch (InvalidIdException e) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "User not found", e);
-        }
-
+        return new ResponseEntity<>(userService.getUsers(), HttpStatus.OK);
     }
 
     @Operation(
@@ -62,9 +55,9 @@ public class UserController {
     public ResponseEntity<UserResponse> getUserInformation(@PathVariable("userId") Long id) {
         try {
             return new ResponseEntity<>(userService.findById(id), HttpStatus.OK);
-        } catch (InvalidIdException e) {
+        } catch (InvalidIdException invalidIdException) {
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "User not found", e);
+                    HttpStatus.NOT_FOUND, invalidIdException.getMessage(), invalidIdException);
         }
     }
 
@@ -85,11 +78,9 @@ public class UserController {
                     id,
                     updateUserRegistrationRequest),
                     HttpStatus.OK);
-        } catch (InvalidIdException e) {
+        } catch (InvalidIdException invalidIdException) {
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "User not found", e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+                    HttpStatus.NOT_FOUND, invalidIdException.getMessage(), invalidIdException);
         }
     }
 
@@ -99,8 +90,8 @@ public class UserController {
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200")})
-    @PutMapping("/{userId}/change-password")
-    public String changePassword(@PathVariable("userId") Long id, @RequestBody PasswordRequest passwordRequestUtil) {
-        return userService.userPasswordChangeResponse(passwordRequestUtil, id);
+    @PutMapping("/{userId}/update-password")
+    public String updatePassword(@PathVariable("userId") Long id, @RequestBody PasswordRequest passwordRequestUtil) {
+        return userService.userPasswordUpdate(passwordRequestUtil, id);
     }
 }

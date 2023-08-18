@@ -14,7 +14,7 @@ public interface AccessTokenRepository extends JpaRepository<AccessToken, Long> 
             on t.user.id = u.id\s
             where u.id = :id and (t.expired = false or t.revoked = false)\s
             """)
-    List<AccessToken> findAllValidTokenByUser(Long id);
+    List<AccessToken> findAllValidTokensByUser(Long id);
 
     Optional<AccessToken> findByToken(String token);
 }

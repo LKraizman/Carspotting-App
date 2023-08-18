@@ -3,6 +3,7 @@ server:
   error:
     include-message: always
     include-binding-errors: always
+    include-exception: true
 
 spring:
   jpa:
@@ -10,7 +11,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-    show-sql: true
+    show-sql: false
   main:
     web-application-type: servlet
     allow-bean-definition-overriding: true

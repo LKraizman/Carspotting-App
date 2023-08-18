@@ -1,5 +1,8 @@
 package com.carspottingapp.controller;
 
+import com.carspottingapp.exception.InvalidPasswordException;
+import com.carspottingapp.exception.UserAlreadyExistException;
+import com.carspottingapp.exception.UserNotFoundException;
 import com.carspottingapp.model.response.AuthenticationResponse;
 import com.carspottingapp.service.request.PasswordRequest;
 import com.carspottingapp.service.request.UserAuthenticationRequest;
@@ -15,8 +18,11 @@ import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 
@@ -26,6 +32,21 @@ import java.io.IOException;
 @RequestMapping("/api/auth")
 public class AuthenticationController {
     private final UserAuthenticationService userAuthenticationService;
+
+    @RequestMapping(value = "/githubAuth", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> getGitHubLink() {
+        return ResponseEntity.status(HttpStatus.TEMPORARY_REDIRECT)
+                .location(userAuthenticationService.gitHubLinkBuilder())
+                .build();
+    }
+
+    @RequestMapping(value = "/verifyGitHubUser", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<AuthenticationResponse> verifyGitHubUser(
+            @RequestParam("state") String state,
+            @RequestParam("code") String code) {
+        return ResponseEntity.ok(userAuthenticationService.verifyGitHubUser(state, code));
+    }
+
 
     @Operation(
             summary = "User registration",
@@ -39,7 +60,16 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationResponse> registerUser(
             @RequestBody UserRegistrationRequest registrationRequest,
             final HttpServletRequest httpServletRequest) {
-        return ResponseEntity.ok(userAuthenticationService.register(registrationRequest, httpServletRequest));
+        try {
+            return ResponseEntity.ok(userAuthenticationService.register(registrationRequest, httpServletRequest));
+        } catch (UserAlreadyExistException userAlreadyExistException) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, userAlreadyExistException.getMessage(), userAlreadyExistException);
+        } catch (InvalidPasswordException invalidPasswordException) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, invalidPasswordException.getMessage(), invalidPasswordException);
+        }
+
     }
 
     @Operation(
@@ -50,7 +80,7 @@ public class AuthenticationController {
             @ApiResponse(responseCode = "200")})
     @PostMapping("/verifyEmail")
     public String verifyEmail(@RequestParam("token") String token) {
-        return userAuthenticationService.userVerification(token);
+        return userAuthenticationService.userEmailVerification(token);
     }
 
     @Operation(
@@ -62,7 +92,15 @@ public class AuthenticationController {
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> authenticateUser(
             @RequestBody UserAuthenticationRequest authenticationRequest) {
-        return ResponseEntity.ok(userAuthenticationService.authenticate(authenticationRequest));
+        try {
+            return ResponseEntity.ok(userAuthenticationService.authenticate(authenticationRequest));
+        } catch (UserNotFoundException userNotFoundException) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, userNotFoundException.getMessage(), userNotFoundException);
+        } catch (InvalidPasswordException invalidPasswordException) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, invalidPasswordException.getMessage(), invalidPasswordException);
+        }
     }
 
     @Operation(
@@ -89,7 +127,7 @@ public class AuthenticationController {
     public String resetPasswordRequest(
             @RequestBody PasswordRequest passwordResetRequest,
             final HttpServletRequest request) throws MessagingException, IOException {
-        return userAuthenticationService.passwordResetSender(passwordResetRequest, request);
+        return userAuthenticationService.sendResetPasswordEmail(passwordResetRequest, request);
     }
 
     @Operation(
@@ -101,6 +139,11 @@ public class AuthenticationController {
     @PostMapping("/reset-password")
     public String resetPassword(@RequestBody PasswordRequest passwordRequestUtil,
                                 @RequestParam("token") String passwordResetToken) {
-        return userAuthenticationService.setNewUserPassword(passwordRequestUtil, passwordResetToken);
+        try {
+            return userAuthenticationService.setNewUserPassword(passwordRequestUtil, passwordResetToken);
+        } catch (InvalidPasswordException invalidPasswordException) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, invalidPasswordException.getMessage(), invalidPasswordException);
+        }
     }
 }

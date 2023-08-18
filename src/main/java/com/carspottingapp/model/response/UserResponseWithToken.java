@@ -7,19 +7,15 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class UserResponseWithToken {
-    public Long id;
-    public String firstName;
-    public String lastName;
-    public String username;
-    public String email;
+    public UserResponse userResponse;
     public String accessToken;
 
     public UserResponseWithToken(User user, String token){
-        this.id = user.getId();
-        this.firstName = user.getFirstName();
-        this.lastName = user.getLastName();
-        this.username = user.getUsername();
-        this.email = user.getEmail();
+        userResponse.setId(user.getId());
+        userResponse.setFirstName(user.getFirstName());
+        userResponse.setLastName(user.getLastName());
+        userResponse.setUsername(user.getUsername());
+        userResponse.setEmail(user.getEmail());
         this.accessToken = token;
     }
 }

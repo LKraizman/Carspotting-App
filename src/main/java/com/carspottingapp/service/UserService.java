@@ -16,8 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -34,11 +32,6 @@ public class UserService implements UserActions {
     }
 
     @Override
-    public Optional<User> findByEmail(String email) {
-        return userRepository.findByUsername(email);
-    }
-
-    @Override
     public UserResponse findById(Long id) {
         return userRepository.findById(id).map(UserResponse::new).orElseThrow(InvalidIdException::new);
     }
@@ -50,30 +43,26 @@ public class UserService implements UserActions {
     }
 
     @Override
-    public boolean oldPasswordIsValid(User user, String oldPassword) {
+    public boolean IsOldPasswordValid(User user, String oldPassword) {
         return passwordEncoder.matches(oldPassword, user.getPassword());
     }
 
     public UserResponseWithToken changeUserInformation(
             Long id,
-            UserRegistrationRequest updateUserInformationRequest)
-            throws IOException {
+            UserRegistrationRequest updateUserInformationRequest){
         User existUser = userRepository.findById(id).orElseThrow(InvalidIdException::new);
         existUser.setUsername(updateUserInformationRequest.getUserName());
         existUser.setFirstName(updateUserInformationRequest.getFirstName());
         existUser.setLastName(updateUserInformationRequest.getLastName());
         userRepository.save(existUser);
         userAuthenticationService.refreshUserToken(existUser);
-        String updatedToken = tokenRepository.findAllValidTokenByUser(existUser.getId()).get(0).getToken();
+        String updatedToken = tokenRepository.findAllValidTokensByUser(existUser.getId()).get(0).getToken();
         return new UserResponseWithToken(existUser, updatedToken);
     }
 
-    public String userPasswordChangeResponse(PasswordRequest passwordRequestUtil, Long id) {
-        if (!Objects.equals(passwordRequestUtil.getOldPassword(), passwordRequestUtil.getOldPasswordRepeat())) {
-            return "The passwords don't match";
-        }
-        User user = userRepository.findById(id).get();
-        if (!oldPasswordIsValid(user, passwordRequestUtil.getOldPassword())) {
+    public String userPasswordUpdate(PasswordRequest passwordRequestUtil, Long id) {
+        User user = userRepository.findById(id).orElseThrow(InvalidIdException::new);
+        if (!IsOldPasswordValid(user, passwordRequestUtil.getOldPassword())) {
             return "Incorrect user password";
         }
         changePassword(user, passwordRequestUtil.getNewPassword());

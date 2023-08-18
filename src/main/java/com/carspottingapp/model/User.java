@@ -85,4 +85,21 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return isEnabled;
     }
+
+    public static User of(String externalUserEmail){
+        return User.builder()
+                .firstName(null)
+                .lastName(null)
+                .username(emailSplitter(externalUserEmail))
+                .email(externalUserEmail)
+                .password(null)
+                .userRole(UserRole.USER)
+                .isEnabled(true)
+                .build();
+    }
+
+    public static String emailSplitter(String email){
+        String[] split = email.split("@");
+        return split[0];
+    }
 }
