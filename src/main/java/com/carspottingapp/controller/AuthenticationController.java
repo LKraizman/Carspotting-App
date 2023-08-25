@@ -47,6 +47,18 @@ public class AuthenticationController {
         return ResponseEntity.ok(userAuthenticationService.verifyGitHubUser(state, code));
     }
 
+    @RequestMapping(value = "/googleAuth", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> getGoogleAuthLink() {
+        return ResponseEntity.status(HttpStatus.TEMPORARY_REDIRECT)
+                .location(userAuthenticationService.googleAuthLinkBuilder())
+                .build();
+    }
+
+    @RequestMapping(value = "/verifyGoogleUser")
+    public ResponseEntity<AuthenticationResponse> verifyGoogleUser(
+            @RequestParam("code") String code) {
+        return ResponseEntity.ok(userAuthenticationService.verifyGoogleUser(code));
+    }
 
     @Operation(
             summary = "User registration",

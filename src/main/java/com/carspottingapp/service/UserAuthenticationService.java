@@ -1,6 +1,7 @@
 package com.carspottingapp.service;
 
 import com.carspottingapp.client.GitHubClient;
+import com.carspottingapp.client.GoogleClient;
 import com.carspottingapp.exception.*;
 import com.carspottingapp.model.OAuthGoogleInfo;
 import com.carspottingapp.model.OAuthGitHubInfo;
@@ -8,6 +9,7 @@ import com.carspottingapp.model.User;
 import com.carspottingapp.model.UserRole;
 import com.carspottingapp.model.response.AuthenticationResponse;
 import com.carspottingapp.model.response.authModel.GitHubUserEmailResponse;
+import com.carspottingapp.model.response.authModel.GoogleUserEmailResponse;
 import com.carspottingapp.model.token.AccessToken;
 import com.carspottingapp.model.token.TokenType;
 import com.carspottingapp.repository.AccessTokenRepository;
@@ -52,6 +54,7 @@ public class UserAuthenticationService {
     private final HttpServletRequest servletRequest;
     private final UrlBuilder urlBuilder;
     private final GitHubClient gitHubClient;
+    private final GoogleClient googleClient;
 
     private static final String EMAIL_REGEX =
             "^(?=.*[0-9])" + "(?=.*[a-z])(?=.*[A-Z])" + "(?=.*[@#$%^&+=])" + "(?=\\S+$).{8,30}$";
@@ -292,6 +295,26 @@ public class UserAuthenticationService {
                         .blockFirst();
 
         var gitHubUser = userRepository.save(User.of(gitHubUserPrimaryEmail));
+        var jwtToken = jwtService.generateToken(gitHubUser);
+        var refreshToken = jwtService.generateRefreshToken(gitHubUser);
+        saveUserToken(gitHubUser, jwtToken);
+        return AuthenticationResponse.builder()
+                .accessToken(jwtToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
+    public URI googleAuthLinkBuilder() {
+        return googleClient.getOauthUri();
+    }
+
+    public AuthenticationResponse verifyGoogleUser(String code) {
+        Mono<OAuthGoogleInfo> oauthGoogleUserInfo = googleClient.getOauthUserToken(code);
+        GoogleUserEmailResponse googleUserEmailResponse = googleClient.getGoogleUserEmail(
+                Objects.requireNonNull(oauthGoogleUserInfo.block())
+                        .getAccess_token()).block();
+        assert googleUserEmailResponse != null;
+        var gitHubUser = userRepository.save(User.of(googleUserEmailResponse.getEmail(), googleUserEmailResponse.getName()));
         var jwtToken = jwtService.generateToken(gitHubUser);
         var refreshToken = jwtService.generateRefreshToken(gitHubUser);
         saveUserToken(gitHubUser, jwtToken);
