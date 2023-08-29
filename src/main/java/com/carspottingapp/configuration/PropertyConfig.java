@@ -7,7 +7,8 @@ import org.springframework.context.annotation.Configuration;
 
 @ConfigurationProperties(prefix = "spot-it")
 @Configuration
-@Getter @Setter
+@Getter
+@Setter
 public class PropertyConfig {
     private String titleLimit;
     private String descriptionLimit;

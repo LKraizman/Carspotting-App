@@ -1,27 +1,21 @@
----
 server:
   port: 5000
   error:
     include-message: always
+    include-binding-errors: always
+    include-exception: true
+
 spring:
-  application:
-    name: spot-it
-  cloud:
-    config:
-      import: optional:configserver:http://localhost:8888
-      profile: prod
-  datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
-    username: chkyoslf
-    password: pass123
   jpa:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-      show-sql: true
+    show-sql: false
   main:
     web-application-type: servlet
+    allow-bean-definition-overriding: true
+
 springdoc:
   swagger-ui:
     path: /spotit-documentation
@@ -31,6 +25,7 @@ springdoc:
   api-docs:
     enabled: true
     path: /spotit-api-docs
+
 carspotting:
   openapi:
     url: http://localhost:5000

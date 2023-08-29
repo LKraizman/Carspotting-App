@@ -18,7 +18,7 @@ public class OpenAPIConfig {
     private String url;
 
     @Bean
-    public OpenAPI carspottingAPI(){
+    public OpenAPI carspottingAPI() {
         Server devServer = new Server();
         devServer.setUrl(url);
         devServer.description("Server URL");
@@ -26,7 +26,7 @@ public class OpenAPIConfig {
         Contact contact = new Contact();
         contact.setEmail("checkyoslf@gmail.com");
         contact.setName("L.Kraizman");
-        contact.setUrl("www.google.com");
+        contact.setUrl("in progress");
 
         License mitlecense = new License().name("MIT License").url("https://choosealicense.com/licenses/mit/");
 

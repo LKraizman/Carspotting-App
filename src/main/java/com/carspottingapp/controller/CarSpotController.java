@@ -1,11 +1,10 @@
-package com.carspottingapp.сontroller;
+package com.carspottingapp.controller;
 
 import com.carspottingapp.exception.InvalidIdException;
 import com.carspottingapp.exception.InvalidLengthException;
-import com.carspottingapp.model.response.CarBrandResponse;
 import com.carspottingapp.model.response.CarSpotResponse;
 import com.carspottingapp.service.CarSpotService;
-import com.carspottingapp.service.NewCarSpotRequest;
+import com.carspottingapp.service.request.NewCarSpotRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -13,7 +12,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -40,9 +38,9 @@ public class CarSpotController {
     public ResponseEntity<CarSpotResponse> addCarSpot(@RequestBody NewCarSpotRequest request) {
         try {
             return new ResponseEntity<>(carSpotService.addCarSpot(request), HttpStatus.OK);
-        } catch (InvalidLengthException e) {
+        } catch (InvalidLengthException invalidLengthException) {
             throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "Incorrect text length", e);
+                    HttpStatus.BAD_REQUEST, invalidLengthException.getMessage(), invalidLengthException);
         }
     }
 
@@ -71,9 +69,9 @@ public class CarSpotController {
     public ResponseEntity<CarSpotResponse> getCarSpotById(@PathVariable Long carSpotId) {
         try {
             return new ResponseEntity<>(carSpotService.getCarSpotById(carSpotId), HttpStatus.OK);
-        } catch (InvalidIdException e) {
+        } catch (InvalidIdException invalidIdException) {
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Car Spot not found", e);
+                    HttpStatus.NOT_FOUND, invalidIdException.getMessage(), invalidIdException);
         }
     }
 
@@ -90,12 +88,12 @@ public class CarSpotController {
                                                        @RequestBody NewCarSpotRequest request) {
         try {
             return new ResponseEntity<>(carSpotService.editCarSpot(id, request), HttpStatus.OK);
-        } catch (InvalidLengthException e) {
+        } catch (InvalidLengthException invalidLengthException) {
             throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "Incorrect text length", e);
-        } catch (InvalidIdException e) {
+                    HttpStatus.BAD_REQUEST, invalidLengthException.getMessage(), invalidLengthException);
+        } catch (InvalidIdException invalidIdException) {
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Car Spot not found", e);
+                    HttpStatus.NOT_FOUND, invalidIdException.getMessage(), invalidIdException);
         }
     }
 
@@ -111,9 +109,9 @@ public class CarSpotController {
     public void deleteCarSpot(@PathVariable("carSpotId") Long id) {
         try {
             carSpotService.deleteCarSpot(id);
-        } catch (InvalidIdException e) {
+        } catch (InvalidIdException invalidIdException) {
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Car Spot not found", e);
+                    HttpStatus.NOT_FOUND, invalidIdException.getMessage(), invalidIdException);
         }
     }
 }

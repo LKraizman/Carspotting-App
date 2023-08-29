@@ -1,7 +1,6 @@
-package com.carspottingapp.сontroller;
+package com.carspottingapp.controller;
 
 import com.carspottingapp.exception.InvalidIdException;
-import com.carspottingapp.model.CarBrand;
 import com.carspottingapp.model.response.CarBrandResponse;
 import com.carspottingapp.model.response.CarModelResponse;
 import com.carspottingapp.service.CarBrandService;
@@ -23,6 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
+@Tag(name = "Cars in database", description = "Cars brands and models API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/cars")
@@ -42,9 +42,9 @@ public class CarController {
     public ResponseEntity<List<CarBrandResponse>> getCarBrandById() {
         try {
             return new ResponseEntity<>(carBrandService.getCarBrands(), HttpStatus.OK);
-        } catch (InvalidIdException e) {
+        } catch (InvalidIdException invalidIdException) {
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Brand not found", e);
+                    HttpStatus.NOT_FOUND, invalidIdException.getMessage(), invalidIdException);
         }
     }
 
@@ -61,9 +61,9 @@ public class CarController {
         try {
             List<CarModelResponse> models = carModelService.getModelsByBrandId(carBrandId);
             return new ResponseEntity<>(models, HttpStatus.OK);
-        } catch (InvalidIdException e) {
+        } catch (InvalidIdException invalidIdException) {
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Brand not found", e);
+                    HttpStatus.NOT_FOUND, invalidIdException.getMessage(), invalidIdException);
         }
     }
 }

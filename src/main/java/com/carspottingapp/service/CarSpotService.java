@@ -8,6 +8,7 @@ import com.carspottingapp.repository.CarSpotRepository;
 import com.carspottingapp.model.CarModel;
 import com.carspottingapp.model.CarSpot;
 import com.carspottingapp.model.response.CarSpotResponse;
+import com.carspottingapp.service.request.NewCarSpotRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -42,11 +43,11 @@ public class CarSpotService {
         Optional<CarModel> carModelById = carModelRepository.findById(request.carModelId);
 
         CarSpot newCarSpot = carModelById.map(model -> new CarSpot(
-                request.carSpotTitle,
-                request.description,
-                request.pictureUrl,
-                model,
-                LocalDateTime.now()))
+                        request.carSpotTitle,
+                        request.description,
+                        request.pictureUrl,
+                        model,
+                        LocalDateTime.now()))
                 .orElseThrow(InvalidIdException::new);
 
         CarSpot saveSpot = carSpotRepository.save(newCarSpot);
